@@ -12,7 +12,8 @@ const CG = (() => {
   // Ângulos em graus, 0 = para cima, horário positivo.
   const VEL = [-119.8, -102.8, -85.9, -69, -52.4, -35.4, -19.2, -3.2, 12.8, 28.6, 44.5, 60, 75, 90, 104.7];
   const velRaw = v => { const i = Math.min(13, Math.floor(v / 10)); return VEL[i] + (v / 10 - i) * (VEL[i + 1] - VEL[i]); };
-  const velAngle = v => Math.max(-114, velRaw(v)); // parado, o ponteiro encosta num batente um pouco acima do 0
+  // parado, o ponteiro encosta num batente um pouco acima do 0; com o limite desbloqueado ele passa do 140 e dá a volta até encostar nesse batente por trás
+  const velAngle = v => Math.min(244, Math.max(-114, velRaw(v)));
   console.assert(velAngle(0) === -114 && Math.abs(velAngle(75) - 4.8) < .01 && velAngle(140) === 104.7, 'velAngle');
 
   // Combustível: o eixo do ponteiro fica escondido pela tampa "FUEL", abaixo do centro da cápsula
@@ -117,11 +118,10 @@ const CG = (() => {
       `<g class="relevo nf"><circle cy="-31.5" r="4.2"/><path d="M-2.9,-34.4l5.8,5.8M2.9,-34.4l-5.8,5.8"/><path transform="translate(${xy(31.5, 45)})" d="M3.6,2.1A4.2,4.2 0 1 1 2.1,-3.6"/></g>` +
       `<g id="miolo"><circle r="23.2" fill="url(#cgMetal)" stroke="#08080a" stroke-width="1.4"/><rect x="-3.4" y="-15" width="6.8" height="30" rx=".8" fill="#4b5058" stroke="#23262b" stroke-width=".7"/></g></g>`,
   };
-  // plaquinha da Honda entre as cápsulas, como na foto do painel aceso (asa e nome em desenho simplificado)
-  PARTS.honda = () => `<g class="housing"><rect x="-29" y="-26" width="58" height="52" rx="2.5" fill="#151517" stroke="#0a0a0b"/><rect x="-25.5" y="-22.5" width="51" height="45" rx="1.5" fill="none" stroke="#85888c" stroke-width=".9"/>` +
-    `<path class="asa" d="M-14,-4L20,-17.5M-15,-.5L16,-12.5M-14,3L12,-7.5M-11.5,6L8,-2M-17.5,-3Q-19,7 -8,8.5L4,5"/><text class="honda" y="16" textLength="41" lengthAdjust="spacingAndGlyphs">HONDA</text></g>`;
+  // emblema da Honda entre as cápsulas, na posição e no tamanho em que aparece na foto do painel aceso
+  PARTS.honda = () => `<image class="housing" href="honda.png" x="-33" y="-26.3" width="66" height="52.6"/>`;
   // disposição do painel original (centros das cápsulas e do furo da ignição na foto); peça com valor null não é desenhada
-  const PLACE = { spd: [206.8, 196, 1], pod: [582.8, 196, 1], ign: [395.8, 403.7, 1], honda: [395.8, 258, 1] };
+  const PLACE = { spd: [206.8, 196, 1], pod: [582.8, 196, 1], ign: [395.8, 403.7, 1], honda: [394.8, 266, 1] };
 
   const DEFS = `<defs>
     <linearGradient id="cgCorpo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d2d30"/><stop offset="1" stop-color="#19191b"/></linearGradient>
@@ -139,12 +139,19 @@ const CG = (() => {
   </defs>`;
 
   const CONTROLS = `<div>
-    <label>Velocidade <input id="vel" type="range" min="0" max="140" step="1" value="0"><output id="velO"></output></label>
+    <div class="vel"><label>Velocidade <input id="vel" type="range" min="0" max="140" step="1" value="0"><output id="velO"></output></label>
+      <label><input id="semLimite" type="checkbox"> Desbloquear limite de velocidade</label></div>
     <label>Combustível <input id="comb" type="range" min="0" max="100" value="0"><output id="combO"></output></label>
     <label>Tempo <select id="mult"><option value="1">1× (real)</option><option value="20" selected>20×</option><option value="200">200×</option></select></label>
     <label><input id="boia" type="checkbox"> Mau contato na boia de combustível</label>
   </div>
   <div id="luzes"><button id="chaveBtn" aria-pressed="false">🔑 Ignição</button><button id="luz" aria-pressed="false">💡 Iluminação</button></div>`;
+
+  // CG 125 Titan 2000 para o controle e o teclado: motor OHV de 12,5 cv a 9.000 rpm e 1,0 kgf.m a 7.500 rpm, 5 marchas, pneu traseiro 90/90-18
+  // (dados da geração 2000 a 2004). O peso é aproximado e as relações (primária 4,055, coroa 43 e pinhão 14)
+  // não achei em fonte confiável e são as que se costuma citar; final = primária x coroa/pinhão. Moto não tem ré.
+  const VEICULO = { cv: 12.5, rpmCv: 9000, kgfm: 1, rpmKgfm: 7500, rpmMax: 9800, lenta: 1400, marchas: [2.769, 1.722, 1.272, 1, .815], re: 0, final: 4.055 * 43 / 14,
+    pneu: [90, 90, 18], kg: 114, cxA: .6, inercia: .006 };
 
   /**
    * Desenha o painel dentro de `target` (um <g> do SVG) e liga os controles em #ctl.
@@ -158,7 +165,7 @@ const CG = (() => {
     $('ctl').innerHTML = CONTROLS;
     const lamp = Object.fromEntries(Object.entries(LAMPS).map(([id, [label, , , c]]) => {
       const b = document.createElement('button');
-      b.textContent = label; b.style.setProperty('--c', c); b.setAttribute('aria-pressed', false);
+      b.textContent = label; b.dataset.luz = id; b.style.setProperty('--c', c); b.setAttribute('aria-pressed', false);
       b.set = on => b.setAttribute('aria-pressed', $('i_' + id).classList.toggle('on', on));
       b.onclick = () => b.set();
       $('luzes').append(b);
@@ -193,6 +200,7 @@ const CG = (() => {
     $('luz').onclick = () => { luz = !luz; estado(); };
     $('boia').onchange = () => { parar(); fuel(); };
     $('vel').oninput = $('comb').oninput = upd;
+    $('semLimite').onchange = () => { $('vel').max = $('semLimite').checked ? 500 : 140; upd(); }; // ao desmarcar, o navegador traz a velocidade de volta ao limite
     upd(); estado();
 
     let odo = 0, last = performance.now(), vRef = 0, tRef = last;
@@ -213,6 +221,7 @@ const CG = (() => {
       }
       requestAnimationFrame(frame);
     })(last);
+    if (typeof Controle !== 'undefined') Controle.ligar(VEICULO); // controle de videogame, se o controle.js estiver junto
   }
 
   return { build, PLACE };

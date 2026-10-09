@@ -14,7 +14,8 @@ const Corsa = (() => {
   const G = { tach: TACH, spd: SPD, fuel: FUEL, temp: TEMP };
   const rpmAngle = rpm => -130 + rpm / 1000 * 37.3;
   // a escala começa em 20 e o ponteiro descansa num batente logo abaixo dela
-  const velAngle = v => Math.max(-136.5, -135 + (v - 20) * 1.352);
+  // com o limite desbloqueado o ponteiro passa do 220 no mesmo passo e trava ao bater no pino de zerar o parcial (perto de 249 km/h)
+  const velAngle = v => Math.min(174.4, Math.max(-136.5, -135 + (v - 20) * 1.352));
   const fuelAngle = l => -45 + l * 2.25;                                  // 0 L na marca vermelha, 20 L no topo
   const tempAngle = t => Math.min(50, Math.max(-51, -23 + (t - 90) * 4.2)); // frio = batente antes do 1º traço
   const RESERVA = 5; // litros: até aqui o ponteiro está na faixa vermelha
@@ -132,9 +133,9 @@ const Corsa = (() => {
   const OVER = {
     fuel: needle('nFuel', FUEL.px, FUEL.py, 90, 1),
     temp: needle('nTemp', TEMP.px, TEMP.py, 87, 1),
-    tach: needle('nRpm', TACH.cx, TACH.cy, TACH.r * .97, 1.4),
+    tach: needle('nRpm', TACH.cx, TACH.cy, TACH.r * .89, 1.4),
     // pino de zerar o parcial, visto de frente, na parte de baixo do velocímetro
-    spd: `<g class="drum">${drum('odo', SPD.cx, 220, 6, 27.7, 23)}${drum('trip', SPD.cx, 317.5, 4, 31.75, 25, true)}</g>` + needle('nVel', SPD.cx, SPD.cy, SPD.r * .97, 1.4) +
+    spd: `<g class="drum">${drum('odo', SPD.cx, 220, 6, 27.7, 23)}${drum('trip', SPD.cx, 317.5, 4, 31.75, 25, true)}</g>` + needle('nVel', SPD.cx, SPD.cy, SPD.r * .89, 1.4) +
       `<g id="knob" tabindex="0" role="button" aria-label="Zerar hodômetro parcial"><circle cx="811" cy="413" r="12" fill="#05070a"/><circle cx="811" cy="413" r="8" fill="#12161a"/><circle cx="808.5" cy="410.5" r="2.5" fill="#39414a"/></g>`,
   };
   // as duas janelas do conta-giros existem mesmo apagadas: cinto e airbag acendem dentro delas.
@@ -158,13 +159,19 @@ const Corsa = (() => {
 
   const CONTROLS = `<div>
     <label>RPM <input id="rpm" type="range" min="0" max="7000" step="50" value="0"><output id="rpmO"></output></label>
-    <label>Velocidade <input id="vel" type="range" min="0" max="220" step="1" value="0"><output id="velO"></output></label>
+    <div class="vel"><label>Velocidade <input id="vel" type="range" min="0" max="220" step="1" value="0"><output id="velO"></output></label>
+      <label><input id="semLimite" type="checkbox"> Desbloquear limite de velocidade</label></div>
     <label>Combustível <input id="comb" type="range" min="0" max="46" value="0"><output id="combO"></output></label>
     <label>Temperatura <input id="temp" type="range" min="50" max="110" value="50"><output id="tempO"></output></label>
     <label>Tempo <select id="mult"><option value="1">1× (real)</option><option value="20" selected>20×</option><option value="200">200×</option></select></label>
     <button id="reset">Zerar parcial</button>
   </div>
   <div id="luzes"><button id="luz" aria-pressed="false">💡 Iluminação</button><button id="todas">Todas as luzes</button></div>`;
+
+  // Corsa 1.6 8V MPFI para o controle de videogame. Motor, peso e aerodinâmica são da ficha técnica;
+  // as relações do câmbio (F15 WR) e do diferencial não achei em fonte confiável e são as que se costuma citar.
+  const VEICULO = { cv: 92, rpmCv: 5600, kgfm: 13, rpmKgfm: 2600, rpmMax: 6400, lenta: 900, marchas: [3.73, 1.96, 1.32, .95, .76], re: 3.31, final: 3.94,
+    pneu: [165, 70, 13], kg: 983, cxA: .658, inercia: .14 };
 
   /**
    * Desenha o painel dentro de `target` (um <g> do SVG) e liga os controles em #ctl.
@@ -188,7 +195,7 @@ const Corsa = (() => {
     $('ctl').innerHTML = CONTROLS;
     const lightBtns = Object.entries(LAMPS).filter(([id]) => $('i_' + id)).map(([id, [label, c]]) => {
       const b = document.createElement('button');
-      b.textContent = label; b.style.setProperty('--c', c); b.setAttribute('aria-pressed', false);
+      b.textContent = label; b.dataset.luz = id; b.style.setProperty('--c', c); b.setAttribute('aria-pressed', false);
       b.set = on => b.setAttribute('aria-pressed', $('i_' + id).classList.toggle('on', on));
       b.onclick = () => b.set();
       $('todas').before(b);
@@ -206,6 +213,7 @@ const Corsa = (() => {
       $('combO').textContent = $('comb').value + ' L'; $('tempO').textContent = $('temp').value + ' °C';
     };
     for (const id of ['rpm', 'vel', 'comb', 'temp']) $(id).oninput = upd;
+    $('semLimite').onchange = () => { $('vel').max = $('semLimite').checked ? 500 : 220; upd(); }; // ao desmarcar, o navegador traz a velocidade de volta ao limite
     upd();
 
     let odo = 0, trip = 0, last = performance.now();
@@ -219,6 +227,7 @@ const Corsa = (() => {
       setDrum('odo', odo); setDrum('trip', trip * 10);
       requestAnimationFrame(frame);
     })(last);
+    if (typeof Controle !== 'undefined') Controle.ligar(VEICULO); // controle de videogame, se o controle.js estiver junto
   }
 
   return { build, SLOTS, G };

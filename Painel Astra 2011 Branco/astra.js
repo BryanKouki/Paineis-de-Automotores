@@ -11,7 +11,8 @@ const Astra = (() => {
   const rpmAngle = rpm => -122.2 + rpm / 7000 * 244.4;
   // o velocímetro não é linear: abre mais até 40 e fecha depois de 140 (pontos medidos no acetato)
   const VEL = [[0, -121.8], [40, -72.6], [140, 39.1], [220, 114.3], [230, 123.7]];
-  const velAngle = v => { const i = Math.max(1, VEL.findIndex(([k]) => k >= v)), [v0, a0] = VEL[i - 1], [v1, a1] = VEL[i]; return a0 + (v - v0) * (a1 - a0) / (v1 - v0); };
+  // acima do 230 (fim da escala) o ponteiro segue no passo do último trecho até encostar por trás no batente do zero
+  const velAngle = v => { if (v > 230) return Math.min(236, 123.7 + (v - 230) * .94); const i = Math.max(1, VEL.findIndex(([k]) => k >= v)), [v0, a0] = VEL[i - 1], [v1, a1] = VEL[i]; return a0 + (v - v0) * (a1 - a0) / (v1 - v0); };
   console.assert([[0, -121.8], [100, -5.58], [220, 114.3]].every(([v, a]) => Math.abs(velAngle(v) - a) < .01), 'velAngle');
   const smallAngle = f => -44.5 + Math.min(1, Math.max(0, f)) * 89.5;
   const TANQUE = 52, RESERVA = 7;    // litros; até RESERVA a luz da bomba acende
@@ -147,13 +148,19 @@ const Astra = (() => {
 
   const CONTROLS = `<div>
     <label>RPM <input id="rpm" type="range" min="0" max="7000" step="50" value="0"><output id="rpmO"></output></label>
-    <label>Velocidade <input id="vel" type="range" min="0" max="220" step="1" value="0"><output id="velO"></output></label>
+    <div class="vel"><label>Velocidade <input id="vel" type="range" min="0" max="230" step="1" value="0"><output id="velO"></output></label>
+      <label><input id="semLimite" type="checkbox"> Desbloquear limite de velocidade</label></div>
     <label>Combustível <input id="comb" type="range" min="0" max="${TANQUE}" value="0"><output id="combO"></output></label>
     <label>Temperatura <input id="temp" type="range" min="50" max="130" value="50"><output id="tempO"></output></label>
     <label>Tempo <select id="mult"><option value="1">1× (real)</option><option value="20" selected>20×</option><option value="200">200×</option></select></label>
     <button id="reset">Zerar parcial</button>
   </div>
   <div id="luzes"><button id="luz" aria-pressed="false">💡 Iluminação</button><button id="todas">Todas as luzes</button></div>`;
+
+  // Astra 2.0 8V Flexpower (gasolina) para o controle de videogame. Motor, peso, pneus e aerodinâmica são da ficha técnica;
+  // as relações do câmbio (F17 WR) e do diferencial não achei em fonte confiável e são as que se costuma citar.
+  const VEICULO = { cv: 133, rpmCv: 5600, kgfm: 18.9, rpmKgfm: 2600, rpmMax: 6400, lenta: 900, marchas: [3.73, 1.96, 1.32, .95, .76], re: 3.31, final: 3.74,
+    pneu: [205, 55, 16], kg: 1180, cxA: .624, inercia: .16 };
 
   /**
    * Desenha o painel dentro de `target` (um <g> do SVG) e liga os controles em #ctl.
@@ -168,7 +175,7 @@ const Astra = (() => {
     $('ctl').innerHTML = CONTROLS;
     const lightBtns = Object.entries(LAMPS).filter(([id]) => !AUTO.includes(id)).map(([id, [label, c]]) => {
       const b = document.createElement('button');
-      b.textContent = label; b.style.setProperty('--c', c); b.setAttribute('aria-pressed', false);
+      b.textContent = label; b.dataset.luz = id; b.style.setProperty('--c', c); b.setAttribute('aria-pressed', false);
       b.set = on => b.setAttribute('aria-pressed', $('i_' + id).classList.toggle('on', on));
       b.onclick = () => b.set();
       $('todas').before(b);
@@ -199,6 +206,7 @@ const Astra = (() => {
       $('combO').textContent = comb + ' L'; $('tempO').textContent = temp + ' °C';
     };
     for (const id of ['rpm', 'vel', 'comb', 'temp']) $(id).oninput = upd;
+    $('semLimite').onchange = () => { $('vel').max = $('semLimite').checked ? 500 : 230; upd(); }; // ao desmarcar, o navegador traz a velocidade de volta ao limite
     upd();
 
     let odo = 0, trip = 0, last = performance.now(), shown = '';
@@ -213,6 +221,7 @@ const Astra = (() => {
       if (t + o !== shown) { shown = t + o; $('lcdTrip').setAttribute('d', lcd(t, 26, 74.5, 17)); $('lcdOdo').setAttribute('d', lcd(o, 26, 97, 13)); }
       requestAnimationFrame(frame);
     })(last);
+    if (typeof Controle !== 'undefined') Controle.ligar(VEICULO); // controle de videogame, se o controle.js estiver junto
   }
 
   return { build, PLACE };

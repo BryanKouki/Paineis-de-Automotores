@@ -34,7 +34,7 @@
   <p>Escolha o painel e a versão.</p>
   <div id="lista"></div>
 </main>
-<iframe id="tela" title="Painel escolhido" hidden></iframe>
+<iframe id="tela" title="Painel escolhido" allow="gamepad" hidden></iframe>
 <button id="voltar" hidden>← Painéis</button>
 
 <script src="versoes.js"></script>
@@ -64,7 +64,7 @@ if (ponte) {
   addEventListener('pagehide', () => navigator.sendBeacon(`http://localhost:${ponte}/sair`));
 }
 // o painel abre num quadro por cima do menu; "← Painéis" volta
-const mostrar = url => { $('tela').src = url ? encodeURI(url) + (ponte ? '?ponte=' + ponte : '') : 'about:blank'; for (const id of ['tela', 'voltar']) $(id).hidden = !url; for (const id of ['menu', 'versao']) $(id).hidden = !!url; }; // com um painel aberto vale a etiqueta de versão dele
+const mostrar = url => { $('tela').src = url ? encodeURI(url) + (ponte ? '?ponte=' + ponte : '') : 'about:blank'; for (const id of ['tela', 'voltar']) $(id).hidden = !url; for (const id of ['menu', 'versao']) $(id).hidden = !!url; if (url) $('tela').focus(); }; // com um painel aberto vale a etiqueta de versão dele
 $('lista').onclick = e => { const b = e.target.closest('button'); if (b) mostrar(b.dataset.url); };
 $('voltar').onclick = () => mostrar('');
 </script>

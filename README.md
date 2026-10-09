@@ -32,8 +32,32 @@ Embaixo de cada painel ficam os controles da simulação:
 
 - **Sliders** de velocidade, RPM, combustível e temperatura (os que o painel tiver).
 - **Tempo**: acelera o hodômetro (1×, 20× ou 200×), porque em tempo real ele leva 36 s para andar 1 km a 100 km/h.
+- **Desbloquear limite de velocidade**: libera o slider até 500 km/h. O ponteiro passa do fim da escala e para onde encontrar um obstáculo, como o pino de zerar o parcial no Corsa.
 - **Iluminação** e um botão para cada **luz-espia**.
 - Cada painel tem ainda o que é dele: pino de zerar o parcial, miolo de ignição, e assim por diante.
+
+## Dirigir pelo teclado ou pelo controle
+
+Aperte uma das teclas abaixo, ou conecte um controle comum (PlayStation, Xbox ou compatível) e aperte um botão: o painel passa a simular o veículo andando. Motor, embreagem, marchas, arrasto e freios são calculados com os dados de cada veículo e movem o conta-giros e o velocímetro. A marcha engatada aparece no canto de cima da janela; o botão de teclado ao lado dela abre esta mesma lista. Mexer num slider com o mouse devolve o comando aos sliders.
+
+O controle segue o mapeamento do Gran Turismo 7, com as setas no direcional em vez do touchpad:
+
+| Função | Teclado | Controle |
+| --- | --- | --- |
+| Acelerador | W | R2 |
+| Freio | S | L2 |
+| Sobe marcha | E | ✕ |
+| Desce marcha | Q | □ |
+| Freio de mão (segurando) | Espaço | ○ |
+| Ré (com o veículo parado) | R | △ |
+| Setas | A / D | Direcional esquerda/direita |
+| Farol alto | F | Direcional para cima |
+| Faróis (iluminação do painel) | L | L3 |
+| Ignição (na CG) | I | Options |
+
+As marchas são em sequência: ré, neutro, 1ª e assim por diante. Como no jogo, a redução é recusada se o giro fosse passar do limite. No limite de giro o motor corta e o ponteiro fica batendo, em neutro ou engatado.
+
+Potência, torque, peso, pneus e aerodinâmica vêm das fichas técnicas (Corsa 1.6 8V, Astra 2.0 8V e CG 125 Titan 2000). A marcha lenta dos carros fica em 900 rpm. As relações de câmbio e de diferencial são as que se costuma citar para esses modelos; não foram conferidas em manual.
 
 ## Multimídia
 
@@ -50,6 +74,8 @@ O relógio é o do computador. O cartão de mensagem e o mapa são só visuais; 
 ```
 index.html                   seletor de painéis
 versoes.js                   versão do projeto e de cada painel
+controle.js                  teclado, controle de videogame e simulação do veículo
+CHANGELOG.md                 o que mudou em cada versão
 Paineis de Automotores.exe   abre o seletor e faz a ponte com a mídia do Windows
 launcher/                    código-fonte do executável, ícone e script de compilação
 logos/                       emblemas usados no seletor
