@@ -8,9 +8,9 @@ Não usa nenhuma biblioteca: é só HTML, CSS e JavaScript, e roda direto do arq
 
 | Painel | O que tem |
 | --- | --- |
-| **Chevrolet Corsa** (painel azul com conta-giros, versões Super e Milenium) | Conta-giros, velocímetro, combustível e temperatura; hodômetro total e parcial de tambores (os números rolam para baixo); pino de zerar o parcial; 12 luzes-espia em que o fundo da janela é que acende; iluminação âmbar; a bomba acende em vermelho na reserva. |
+| **Chevrolet Corsa** (painel azul com conta-giros, versões GLS, Milenium e Super) | Conta-giros, velocímetro, combustível e temperatura; hodômetro total e parcial de tambores (os números rolam para baixo); pino de zerar o parcial; 12 luzes-espia em que o fundo da janela é que acende; iluminação âmbar; a bomba acende em vermelho na reserva. |
 | **Chevrolet Astra 2011** (mostradores brancos) | Conta-giros 0–70 (x100) e velocímetro 0–220 com a escala não linear do original; hodômetro digital (parcial e total); 23 luzes-espia; luz de troca de marcha automática; aviso de velocidade máxima programável; luz da reserva; iluminação laranja. |
-| **Honda CG 125 Titan 2000** | Velocímetro 0–140 com a faixa vermelha em blocos e hodômetro de tambores; lentes NEUTRAL, TURN e HI-BEAM com trama de vidro; miolo de ignição que liga o painel e acende o neutro; marcador de combustível; opção "mau contato na boia", em que o ponteiro balança quando a velocidade muda de repente. |
+| **Honda CG 125 Titan 2000** | Velocímetro 0–140 com a faixa vermelha em blocos e hodômetro de tambores; lentes NEUTRAL, TURN e HI-BEAM com trama de vidro; miolo de ignição que liga o painel e acende o neutro; partida elétrica e pedal de partida; marcador de combustível; opção "mau contato na boia", em que o ponteiro balança quando a velocidade muda de repente. |
 
 Cada painel tem três versões:
 
@@ -55,11 +55,11 @@ O controle segue o mapeamento do Gran Turismo 7, com as setas no direcional em v
 | Faróis (iluminação do painel) | L | L3 |
 | Ignição e partida | I | Options |
 
-Nos carros o motor precisa ser ligado: o miolo da ignição fica no canto dos controles, com as posições B, I, II e III. Clique numa marca para girar até ela; em II acendem as luzes de bateria, óleo e injeção, e segurando a III o motor pega (o giro sobe a uns 1.100 rpm e volta para a marcha lenta). A tecla I faz o mesmo em sequência: liga a ignição, dá a partida e, com o motor funcionando, desliga. Na CG o miolo fica no próprio painel e basta ligar o contato.
+Nos carros o motor precisa ser ligado: o miolo da ignição fica no canto dos controles, com as posições B, I, II e III. Um clique no miolo leva à posição I e outro à II, onde acendem as luzes de bateria, óleo e injeção. Em II, clicar e segurar dá a partida (o giro sobe a uns 1.100 rpm e volta para a marcha lenta); um clique só volta para a I e desliga o motor. Também dá para clicar direto numa marca. A tecla I faz tudo em sequência: liga a ignição, dá a partida e, com o motor funcionando, desliga. Na CG o miolo fica no próprio painel e a partida fica no canto dos controles: com o contato ligado, o motor pega segurando o botão vermelho de partida elétrica ou com um clique no pedal de partida, e a luz à esquerda deles acende enquanto o motor funciona.
 
 As marchas são em sequência: ré, neutro, 1ª e assim por diante. Como no jogo, a redução é recusada se o giro fosse passar do limite. No limite de giro o motor corta e o ponteiro fica batendo, em neutro ou engatado.
 
-Dirigindo, o combustível é gasto de verdade: o tanque desce conforme o esforço do motor. Com o tanque praticamente vazio o motor engasga por alguns segundos e morre; o giro zera e o veículo vai perdendo velocidade. Para abastecer, mexa no slider de combustível; nos carros, depois de uma pane seca, é preciso dar a partida de novo. Os painéis abrem com o tanque em zero, então abasteça antes de sair.
+Dirigindo, o combustível é gasto de verdade: o tanque desce conforme o esforço do motor. Com o tanque praticamente vazio o motor engasga por alguns segundos e morre; o giro zera e o veículo vai perdendo velocidade. Para abastecer, mexa no slider de combustível; depois de uma pane seca é preciso dar a partida de novo. Os painéis abrem com o tanque em zero, então abasteça antes de sair.
 
 Potência, torque, peso, pneus e aerodinâmica vêm das fichas técnicas (Corsa 1.6 8V, Astra 2.0 8V e CG 125 Titan 2000). A marcha lenta dos carros fica em 900 rpm. As relações de câmbio e de diferencial são as que se costuma citar para esses modelos; não foram conferidas em manual.
 
@@ -79,6 +79,7 @@ O relógio é o do computador. O cartão de mensagem e o mapa são só visuais; 
 index.html                   seletor de painéis
 versoes.js                   versão do projeto e de cada painel
 controle.js                  teclado, controle de videogame e simulação do veículo
+pedal.png                    símbolo do pedal de partida das motos
 CHANGELOG.md                 o que mudou em cada versão
 Paineis de Automotores.exe   abre o seletor e faz a ponte com a mídia do Windows
 launcher/                    código-fonte do executável, ícone e script de compilação

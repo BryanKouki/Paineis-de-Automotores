@@ -1,6 +1,6 @@
 // Controle de videogame e teclado: simulam o veículo andando (ignição, partida, motor, embreagem, marchas, arrasto, freios e
 // combustível) e movem o painel pelos mesmos sliders. A marcha engatada fica no canto da janela, com um botão discreto que mostra
-// as teclas. Nos carros, o miolo da ignição fica no canto dos controles.
+// as teclas. No canto dos controles ficam o miolo da ignição (carros) ou o botão e o pedal de partida (motos).
 //
 // O controle segue o mapeamento do Gran Turismo 7: R2 acelera, L2 freia, ✕ sobe marcha, □ desce, ○ freio de mão, △ ré, L3 faróis.
 // Diferenças: as setas ficam no direcional (esquerda/direita) em vez do touchpad; direcional para cima liga o farol alto;
@@ -25,7 +25,7 @@ const Controle = (() => {
 </div>
 <div id="teclasLista" hidden><table><tr><th>Função</th><th>Teclado</th><th>Controle</th></tr>${AJUDA.map(l => `<tr>${l.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</table></div>`;
   // miolo da ignição dos carros: posições B (bloqueado), I (acessórios), II (ignição ligada) e III (partida, que volta sozinha para II).
-  // Ângulos das marcas medidos na foto do miolo; a fenda fica na horizontal em B
+  // Ângulos das marcas medidos na foto do miolo; a fenda aponta para a marca da posição atual
   const FASES = [['B', -105], ['I', -18], ['II', 24], ['III', 52]];
   const MIOLO = `<style>#ctl{position:relative;padding-left:136px;padding-right:136px}
 #chaveCarro{position:absolute;right:36px;bottom:6px;width:92px;height:92px;cursor:pointer;user-select:none;touch-action:none}
@@ -37,8 +37,33 @@ const Controle = (() => {
   <defs><linearGradient id="chaveMetal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9acb0"/><stop offset=".5" stop-color="#8b8e93"/><stop offset="1" stop-color="#6f7277"/></linearGradient></defs>
   <circle r="48.5" fill="#0b0b0c" stroke="#2c2d31" stroke-width="1.5"/>
   ${FASES.map(([nome, a], i) => `<g data-fase="${i}"${i ? '' : ' class="atual"'} transform="rotate(${a})"><rect x="-10" y="-49" width="20" height="19" fill="transparent"/><text y="-39.5">${nome}</text></g>`).join('')}
-  <g id="tambor"><circle r="29.5" fill="url(#chaveMetal)" stroke="#050506" stroke-width="1.5"/><rect x="-18" y="-3.3" width="36" height="6.6" rx="1" fill="#26282c" stroke="#55585d" stroke-width=".6"/></g>
+  <circle r="29.5" fill="url(#chaveMetal)" stroke="#050506" stroke-width="1.5"/><rect id="tambor" x="-3.3" y="-18" width="6.6" height="36" rx="1" fill="#26282c" stroke="#55585d" stroke-width=".6" transform="rotate(${FASES[0][1]})"/>
 </svg>`;
+  // partida da moto, no mesmo canto: botão de partida elétrica em cima (segurando), pedal de partida embaixo (um chute) e, à esquerda,
+  // a luz de motor funcionando. Símbolo e tecla desenhados pelas medidas da foto do punho; o pedal.png fica junto deste arquivo.
+  // overflow:clip na barra: o pedal, ao girar no chute, passa da borda e sem isso a página ganha barra de rolagem
+  const PARTIDA = `<style>#ctl{position:relative;padding-left:136px;padding-right:136px;min-height:98px;overflow:clip}
+#ctl #partidaMoto{position:absolute;right:36px;bottom:6px;margin:0;display:flex;flex-wrap:nowrap;align-items:center;gap:14px;user-select:none}
+#partidaMoto button{display:block;margin:0 auto;padding:0;border:0;border-radius:6px;background:none;line-height:0;touch-action:none}
+#partidaMoto button:focus-visible{outline:2px solid #4a7fb5;outline-offset:2px}
+#motorLigado{width:14px;height:14px;border-radius:50%;background:#20252b;border:1.5px solid #3a4350}
+#motorLigado.on{background:#3ddc6a;border-color:#9af3b4;box-shadow:0 0 10px #3ddc6a}
+#partidaEletrica:active .tecla{transform:translateY(5px);filter:brightness(.8)}
+#partidaMoto #pedal{margin-top:6px}
+#pedal img{height:42px;transform-origin:22% 89%;transition:transform .1s}
+#pedal:active img{transform:rotate(20deg)}</style>
+<div id="partidaMoto">
+  <span id="motorLigado" role="img" title="Motor desligado"></span>
+  <div>
+    <button id="partidaEletrica" aria-label="Partida elétrica (segure)" title="Partida elétrica (segure)"><svg width="42" height="59" viewBox="-2 0 136 190" aria-hidden="true">
+      <defs><linearGradient id="teclaVermelha" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ea5247"/><stop offset="1" stop-color="#d9403c"/></linearGradient></defs>
+      <g transform="translate(66 38)" fill="#c9cdd4"><path d="M-15.5 26.9A31 31 0 1 1 28.1 13.1" fill="none" stroke="#c9cdd4" stroke-width="6"/><path d="M20.4 8.2 37.1 15 14 29z"/>
+        <polygon points="-2,-24 5,-24 0,-11 11,-10 6,1 4,2 14,4 8,15 6,16 -7,32 -4,16 -12,14 -7,3 -6,2 -16,-1 -10,-12"/></g>
+      <g transform="translate(0 88)"><path class="tecla" d="M9 0H123a9 9 0 0 1 9 9V68a32 32 0 0 1-32 32H32A32 32 0 0 1 0 68V9a9 9 0 0 1 9-9z" fill="url(#teclaVermelha)"/></g>
+    </svg></button>
+    <button id="pedal" aria-label="Pedal de partida" title="Pedal de partida"><img src="../pedal.png" alt=""></button>
+  </div>
+</div>`;
 
   /**
    * v = dados do veículo: cv e rpmCv (potência máxima), kgfm e rpmKgfm (torque máximo), rpmMax, lenta,
@@ -71,6 +96,7 @@ const Controle = (() => {
     $('comb').addEventListener('input', e => { if (e.isTrusted) litros = +e.target.value * porUnidade; });
     // ignição dos carros: fase = posição do miolo (0 B, 1 I, 2 II, 3 III); rodando = motor funcionando
     let fase = 0, rodando = false, giraDesde = null, soltarEm = 0, pegouEm = -1e9, estadoAntes = 0, testeAte = 0;
+    let apertado = false, chute = false; // moto: botão de partida seguro e chute no pedal ainda por atender
     // dirigindo, os ponteiros respondem mais rápido (dá para ver a partida, o corte de giro e a queda do giro na troca de marcha)
     const ponteiros = () => { for (const id of ['nRpm', 'nVel']) if ($(id)) $(id).style.transitionDuration = simulando ? '80ms' : ''; };
     const ativa = () => { // assume de onde os sliders estão
@@ -90,17 +116,30 @@ const Controle = (() => {
     addEventListener('keyup', e => seguras.delete(e.code));
     addEventListener('blur', () => seguras.clear());
 
-    if (v.chave) { // miolo no canto dos controles: clique numa marca para girar até ela; segure a III (ou o miolo, estando em II) para dar a partida
+    if (v.chave) { // miolo no canto dos controles: um clique leva à I, outro à II; em II, segurar dá a partida e um clique só volta para a I
       $('ctl').insertAdjacentHTML('beforeend', MIOLO);
       const m = $('chaveCarro');
+      let segurando = 0; // temporizador que separa o clique do segurar
       m.onpointerdown = e => {
-        const marca = e.target.closest('[data-fase]');
+        const marca = e.target.closest('[data-fase]'); // clicar numa marca gira direto até ela
         ativa(); soltarEm = 0;
-        fase = marca ? +marca.dataset.fase : Math.min(3, fase + 1);
-        if (fase === 3) try { m.setPointerCapture(e.pointerId); } catch (x) { } // segurando, a partida continua mesmo se o mouse sair de cima
+        try { m.setPointerCapture(e.pointerId); } catch (x) { } // segurando, a partida continua mesmo se o mouse sair de cima
+        if (marca) fase = +marca.dataset.fase;
+        else if (fase < 2) fase++;
+        else if (fase === 2) segurando = setTimeout(() => { segurando = 0; fase = 3; }, 250);
       };
-      m.onpointerup = m.onpointercancel = () => { if (fase === 3) fase = 2; }; // a partida volta sozinha para II
+      m.onpointerup = m.onpointercancel = e => {
+        if (segurando) { clearTimeout(segurando); segurando = 0; if (e.type === 'pointerup') fase = 1; }
+        else if (fase === 3) fase = 2; // a partida volta sozinha para II
+      };
       m.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toques.add('ignicao'); } };
+    } else { // moto: botão de partida elétrica (segurando) e pedal de partida (um chute) no mesmo canto
+      $('ctl').insertAdjacentHTML('beforeend', PARTIDA);
+      const b = $('partidaEletrica');
+      b.onpointerdown = e => { ativa(); apertado = true; try { b.setPointerCapture(e.pointerId); } catch (x) { } };
+      b.onpointerup = b.onpointercancel = () => { apertado = false; };
+      b.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { ativa(); soltarEm = performance.now() + 900; } }; // pelo teclado, segura por 0,9 s
+      $('pedal').onclick = () => { ativa(); chute = true; };
     }
 
     const mostra = (id, valor, passo) => { // escreve no slider e avisa o painel, só quando o número muda
@@ -142,17 +181,26 @@ const Controle = (() => {
       // trocou de marcha, girou a chave); entre uma mudança e outra os botões dessas luzes continuam funcionando normalmente
       if (mao !== maoAntes) { maoAntes = mao; if (luz('freio')) luz('freio').set(mao); }
 
-      // ignição e partida
-      let contato;
+      // ignição e partida; girando = motor de partida acionado
+      let contato, girando;
       if (v.chave) {
         // pela tecla ou pelo controle: desligado -> ignição (II) -> partida (segura a III por 0,9 s) -> com o motor funcionando, desliga
         if (toques.has('ignicao')) { if (fase < 2) fase = 2; else if (!rodando) { fase = 3; soltarEm = agora + 900; } else fase = 0; }
         if (fase === 3 && soltarEm && agora > soltarEm) { fase = 2; soltarEm = 0; }
-        contato = fase >= 2;
-        if (!contato || morto) rodando = false; // sem ignição ou depois da pane seca, só pega de novo dando a partida
-        // o motor de partida gira o motor a uns 230 rpm; depois de 0,6 s girando, pega (se tiver combustível)
-        if (fase === 3 && !rodando) { giraDesde = giraDesde ?? agora; if (agora - giraDesde > 600 && litros > SECO) { rodando = true; pegouEm = agora; } }
-        else giraDesde = null;
+        contato = fase >= 2; girando = fase === 3;
+      } else { // moto: o contato é o miolo do próprio painel
+        const ligada = () => !$('chaveBtn') || $('chaveBtn').getAttribute('aria-pressed') === 'true';
+        // pela tecla ou pelo controle: liga o contato -> partida (0,9 s no botão) -> com o motor funcionando, desliga
+        if (toques.has('ignicao')) { if (ligada() && !rodando) soltarEm = agora + 900; else if ($('chaveBtn')) $('chaveBtn').click(); }
+        contato = ligada(); girando = contato && (apertado || agora < soltarEm);
+      }
+      if (!contato || morto) rodando = false; // sem ignição ou depois da pane seca, só pega de novo dando a partida
+      // o motor de partida gira o motor a uns 230 rpm; depois de 0,6 s girando, pega (se tiver combustível); no pedal, pega no chute
+      if (girando && !rodando) { giraDesde = giraDesde ?? agora; if (agora - giraDesde > 600 && litros > SECO) { rodando = true; pegouEm = agora; } }
+      else giraDesde = null;
+      if (chute && contato && !rodando && litros > SECO) { rodando = true; pegouEm = agora; }
+      chute = false;
+      if (v.chave) {
         const estado = contato ? (rodando ? 2 : 1) : 0; // 0 desligado, 1 ignição ligada com o motor parado, 2 motor funcionando
         if (estado !== estadoAntes) {
           for (const id of v.chave.ateLigar) if (luz(id)) luz(id).set(estado === 1);
@@ -161,14 +209,12 @@ const Controle = (() => {
           estadoAntes = estado;
         }
         if (testeAte && agora > testeAte) { testeAte = 0; for (const id of v.chave.teste) if (luz(id)) luz(id).set(false); }
-        $('tambor').style.transform = `rotate(${FASES[fase][1] - FASES[0][1]}deg)`;
+        $('tambor').style.transform = `rotate(${FASES[fase][1]}deg)`;
         $('chaveCarro').querySelectorAll('[data-fase]').forEach((g, i) => g.classList.toggle('atual', i === fase));
         $('chaveCarro').setAttribute('aria-label', `Ignição: posição ${FASES[fase][0]}${rodando ? ', motor funcionando' : ''}`);
-      } else { // moto: o contato é o miolo do próprio painel, e o motor (a pedal) funciona enquanto ele estiver ligado
-        if (toques.has('ignicao') && $('chaveBtn')) $('chaveBtn').click();
-        contato = !$('chaveBtn') || $('chaveBtn').getAttribute('aria-pressed') === 'true';
-        if (contato && !morto && !rodando) pegouEm = agora;
-        rodando = contato && !morto;
+      } else {
+        $('motorLigado').classList.toggle('on', rodando);
+        $('motorLigado').title = rodando ? 'Motor funcionando' : 'Motor desligado';
       }
       toques.clear();
       const chave = contato + '|' + marcha;

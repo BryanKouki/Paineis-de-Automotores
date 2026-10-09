@@ -2,7 +2,7 @@
 // Para lançar uma versão nova, mude os números aqui: a etiqueta no canto de cada janela vem deste arquivo.
 const VERSOES = {
   projeto: '1.1',
-  'Painel Corsa Azul Conta Giros': '1.1',
+  'Painel Corsa GLS Millenium Super com conta giros': '1.1',
   'Painel Astra 2011 Branco': '1.1',
   'Painel CG 125 2000': '1.1',
 };
