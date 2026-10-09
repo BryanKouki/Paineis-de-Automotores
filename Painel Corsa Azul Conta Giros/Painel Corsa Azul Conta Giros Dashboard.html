@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel Corsa Azul Conta Giros Dashboard</title>
+<link rel="stylesheet" href="corsa.css">
+</head>
+<body>
+<!-- tela retangular 1920x720 (8:3), sem a carcaça -->
+<svg id="p" viewBox="0 0 1920 720" role="img" aria-label="Painel Corsa azul com conta-giros em tela retangular">
+  <defs><linearGradient id="tela" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c1016"/><stop offset="1" stop-color="#161c26"/></linearGradient></defs>
+  <rect width="1920" height="720" rx="26" fill="url(#tela)" stroke="#2a3340" stroke-width="2"/>
+  <g id="painel"></g>
+</svg>
+<div id="ctl"></div>
+
+<script src="icones.js"></script>
+<script src="corsa.js"></script>
+<script>
+// mesma disposição do painel original, ampliada 1,5x e centralizada na tela
+const M = (x, y) => [(x - 606) * 1.5 + 960, (y - 296) * 1.5 + 360];
+Corsa.build({
+  target: document.getElementById('painel'),
+  ring: .35,
+  place: Object.fromEntries(Object.entries(Corsa.G).map(([k, g]) => [k, [...M(g.cx, g.cy), 1.5]])),
+  slots: Corsa.SLOTS.map(([x, y, w, h, ids]) => [...M(x, y), w * 1.5, h * 1.5, ids]),
+});
+</script>
+</body>
+</html>

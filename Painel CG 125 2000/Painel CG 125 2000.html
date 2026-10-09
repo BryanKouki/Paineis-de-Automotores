@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel CG 125 2000</title>
+<link rel="stylesheet" href="cg.css">
+</head>
+<body>
+<!-- coordenadas = pixels da foto de referência (797x491) -->
+<svg id="p" viewBox="-12 -6 821 503" role="img" aria-label="Painel de instrumentos Honda CG 125 2000">
+  <g id="carcaca" class="housing"></g>
+  <g id="painel"></g>
+</svg>
+<div id="ctl"></div>
+
+<script src="icones.js"></script>
+<script src="cg.js"></script>
+<script>
+// Contorno da carcaça escaneado da foto (scan por programa); o miolo da ignição tampa o furo de baixo
+const CORPO = 'M573.0,19.9L547.0,22.9L529.0,27.7L507.0,36.4L492.0,44.4L478.0,53.5L465.0,63.5L444.0,83.9L433.5,97.0L427.0,107.1L423.0,109.9L418.0,110.5L369.0,111.1L364.0,109.4L358.3,104.0L348.4,91.0L336.1,77.0L325.9,67.0L310.0,53.7L297.0,45.0L283.0,37.4L262.0,28.8L248.0,24.8L226.0,21.0L206.0,20.3L188.0,21.1L166.0,24.9L153.0,28.6L130.0,37.7L115.0,45.9L102.0,54.9L90.8,64.0L76.0,78.5L67.9,88.0L56.0,105.3L43.1,131.0L35.9,154.0L32.4,171.0L30.6,187.0L30.4,205.0L31.5,219.0L32.7,229.0L37.4,249.0L22.7,272.0L21.7,284.0L25.9,295.0L32.0,301.0L39.0,303.5L64.0,302.9L64.0,304.0L63.0,304.4L46.0,305.0L48.0,306.1L68.0,307.0L81.0,321.5L98.0,336.6L120.2,352.0L143.0,364.0L147.2,369.0L149.1,373.0L170.6,427.0L177.0,433.5L184.0,436.6L318.0,452.9L334.0,458.6L342.0,463.0L354.0,471.4L368.0,478.0L382.0,481.8L395.0,482.4L406.0,481.7L420.0,478.2L435.0,471.5L454.0,459.5L461.0,456.6L474.6,453.0L601.0,437.9L607.0,436.4L614.8,431.0L622.0,421.3L636.7,378.0L642.0,368.8L645.0,365.5L666.0,355.1L691.0,338.7L702.7,329.0L727.0,303.0L751.0,303.8L760.0,300.8L763.9,297.0L767.5,291.0L770.2,284.0L770.2,279.0L766.6,269.0L752.0,249.0L755.9,233.0L758.8,213.0L758.6,180.0L755.6,160.0L752.2,147.0L744.3,126.0L735.4,108.0L722.5,88.0L708.0,71.0L690.0,55.2L671.0,42.6L657.0,35.6L628.0,25.1L609.0,21.3L589.0,19.6Z';
+document.getElementById('carcaca').innerHTML = `<path d="${CORPO}" fill="url(#cgCorpo)" stroke="#0c0c0d" stroke-width="1.5" stroke-linejoin="round"/>`;
+CG.build({ target: document.getElementById('painel') });
+</script>
+</body>
+</html>

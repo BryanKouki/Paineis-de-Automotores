@@ -1,0 +1,59 @@
+/* Estilo compartilhado pelos três painéis do Corsa azul com conta-giros */
+html,body{height:100%;margin:0}
+body{display:flex;flex-direction:column;background:#2b2f33;color:#dde;font:13px system-ui,sans-serif;transition:background .4s}
+body.lit{background:#050608}
+svg#p{flex:1;min-height:0;width:100%}
+#ctl{padding:10px 16px;background:#15181b}
+#ctl>div{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:center;margin:6px 0}
+#luzes{gap:6px!important}
+#ctl label{display:flex;align-items:center;gap:8px}
+#ctl input[type=range]{width:150px}
+#ctl output{min-width:4.8em;font-variant-numeric:tabular-nums}
+button,select{font:inherit;padding:5px 10px;border-radius:6px;border:1px solid #556;background:#262b31;color:inherit;cursor:pointer}
+button[aria-pressed=true]{background:var(--c,#ffc56e);color:#111;border-color:var(--c,#ffc56e)}
+
+.housing{transition:filter .4s}
+.lit .housing{filter:brightness(.3)}
+.face{fill:url(#face)}
+.lit .face{fill:url(#faceLit)}
+.shade{fill:url(#shade);pointer-events:none}
+.hole{fill:#1b2c47}
+.marks{transition:filter .4s}
+.marks text{fill:#eef1f4;stroke:#eef1f4;stroke-width:.5;font:italic 26.5px Arial,Helvetica,sans-serif;text-anchor:middle;dominant-baseline:central;transition:fill .4s,stroke .4s}
+.marks text.m{font-size:19px;stroke-width:.4}
+.marks text.s{font-size:12.5px;stroke-width:.2}
+.marks text.xs{font-size:8px;stroke-width:0}
+.marks line,.marks .ic{stroke:#eef1f4;transition:stroke .4s}
+.marks .ic{fill:none;stroke-width:1.8}
+.marks .icf{fill:#eef1f4;stroke:none;transition:fill .4s}
+/* iluminação: âmbar leve, só na escala — o ponteiro continua branco */
+.lit .marks text{fill:#ffc56e;stroke:#ffc56e}
+.lit .marks .icf{fill:#ffc56e}
+.lit .marks line,.lit .marks .ic{stroke:#ffc56e}
+.lit .marks{filter:drop-shadow(0 0 3px #ffa63c)}
+.marks .red{stroke:#d9463a!important;fill:none}
+.marks .gap{stroke:#1d3050!important}
+/* reserva: a bomba acende em vermelho quando o ponteiro entra na faixa vermelha */
+.marks .low .icf{fill:#ff3b30!important}
+.marks .low .ic{stroke:#ff3b30!important}
+.marks .low{filter:drop-shadow(0 0 4px #ff3b30)}
+.needle{fill:#eeede4;stroke:#b9b6a6;stroke-width:.5;transition:transform .25s ease-out;filter:drop-shadow(1.5px 3px 2px #0009)}
+.drum .dwin{fill:#0c0e11}
+.drum text{fill:#ecece6;font:19px Arial,Helvetica,sans-serif;text-anchor:middle}
+.drum .tenth rect{fill:#cbc8ab}
+.drum .tenth text{fill:#16181a}
+/* luzes-espia: quem acende é o fundo da janela; o símbolo fica escuro por cima */
+.slot{stroke:#262b31;stroke-width:2}
+.lamp .bg{fill:var(--off,transparent)}
+.lamp .sym{fill:#0b0c0e;stroke:#0b0c0e;opacity:.55;stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
+.lamp .sym text{font:700 10px Arial,sans-serif;text-anchor:middle;dominant-baseline:central;stroke-width:.4}
+.lamp.on .bg{fill:var(--c);filter:drop-shadow(0 0 5px var(--c))}
+.lamp.on .sym{opacity:.9}
+.lamp.on.blink .bg{animation:bl .7s steps(1) infinite}
+@keyframes bl{50%{fill:var(--off,transparent);filter:none}}
+/* espia sem janela: o próprio símbolo acende */
+.lamp.simb .sym{fill:var(--c);stroke:var(--c);opacity:.12}
+.lamp.simb.on .sym{opacity:1;filter:drop-shadow(0 0 3px var(--c))}
+.nf{fill:none!important}
+.tr{stroke:none!important}
+#knob{cursor:pointer}

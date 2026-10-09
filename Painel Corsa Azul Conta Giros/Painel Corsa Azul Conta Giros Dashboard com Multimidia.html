@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel Corsa Azul Conta Giros Dashboard com Multimidia</title>
+<link rel="stylesheet" href="corsa.css">
+</head>
+<body>
+<!-- tela retangular 1920x720: conta-giros à esquerda, multimídia no meio, velocímetro à direita -->
+<svg id="p" viewBox="0 0 1920 720" role="img" aria-label="Painel Corsa azul com conta-giros e multimídia">
+  <defs><linearGradient id="tela" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c1016"/><stop offset="1" stop-color="#161c26"/></linearGradient></defs>
+  <rect width="1920" height="720" rx="26" fill="url(#tela)" stroke="#2a3340" stroke-width="2"/>
+  <g id="painel"></g>
+  <g id="mm"></g>
+</svg>
+<div id="ctl"></div>
+
+<script src="icones.js"></script>
+<script src="corsa.js"></script>
+<script src="multimidia.js"></script>
+<script>
+// cada mostrador no seu canto: [x, y, escala]; as espias viram janelas soltas em volta
+Corsa.build({
+  target: document.getElementById('painel'),
+  ring: .35,
+  place: { tach: [292, 296, 1.33], fuel: [112, 614, .95], spd: [1628, 296, 1.33], temp: [1808, 614, .95] },
+  slots: [[680, 40, 60, 40, [['eletr', 0, 1, 'simb']]], [800, 40, 120, 40, ['alto']], [960, 40, 120, 40, ['seta']], [1120, 40, 120, 40, ['nebl']],
+    [360, 600, 170, 48, ['freio', 'bat']], [360, 660, 110, 44, ['inj']], [1560, 600, 170, 48, ['oleo', 'eng']], [1560, 660, 110, 44, ['abs']]],
+});
+Multimidia.build({
+  target: document.getElementById('mm'), contato: 'Colin McRae',
+  tema: { cartao: '#17233a', borda: '#263651', botao: '#27375a', sub: '#9fb0c6', rua: '#22314a', mapa: '#101826', acento: '#3d7bff', capa: ['#4672b8', '#14233f'],
+    hora: 'italic 600 30px Arial,Helvetica,sans-serif', horaCor: '#f3f5f7' },
+});
+</script>
+</body>
+</html>

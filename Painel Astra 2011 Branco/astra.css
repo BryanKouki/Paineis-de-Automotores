@@ -1,0 +1,48 @@
+/* Estilo compartilhado pelos três painéis do Astra 2011 (mostradores brancos) */
+html,body{height:100%;margin:0}
+body{display:flex;flex-direction:column;background:#2b2f33;color:#dde;font:13px system-ui,sans-serif;transition:background .4s}
+body.lit{background:#050608}
+svg#p{flex:1;min-height:0;width:100%}
+#ctl{padding:10px 16px;background:#15181b}
+#ctl>div{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:center;margin:6px 0}
+#luzes{gap:6px!important}
+#ctl label{display:flex;align-items:center;gap:8px}
+#ctl input[type=range]{width:150px}
+#ctl output{min-width:4.8em;font-variant-numeric:tabular-nums}
+button,select{font:inherit;padding:5px 10px;border-radius:6px;border:1px solid #556;background:#262b31;color:inherit;cursor:pointer}
+button[aria-pressed=true]{background:var(--c,#ffb07a);color:#111;border-color:var(--c,#ffb07a)}
+
+.housing{transition:filter .4s}
+.lit .housing{filter:brightness(.35)}
+.aro{fill:#2a2b2f;stroke:url(#cromo)}
+.face{fill:url(#face);transition:fill .4s}
+/* iluminação: o mostrador inteiro acende em laranja e os números continuam pretos */
+.lit .face{fill:url(#faceLit)}
+.seg{fill:#2a2b2f}
+.marks text{fill:#17181a;font:500 28.3px Bahnschrift,"DIN Alternate","Arial Narrow",Arial,sans-serif;font-stretch:75%;text-anchor:middle;dominant-baseline:central}
+.marks text.v{font-size:24px}
+.marks text.m{font-size:13px}
+.marks text.f{font-size:11.5px}
+.marks text.s{font-size:9.5px}
+.marks text.xs{font-size:7.4px}
+.marks line{stroke:#17181a}
+.marks .ic{fill:none;stroke:#17181a;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.marks .icf{fill:#17181a}
+.marks .red{stroke:#c8281e!important}
+.needle{fill:#141416;stroke:#3a3a3e;stroke-width:.5;transition:transform .25s ease-out;filter:drop-shadow(1.5px 3px 2px #0006)}
+.hub{fill:url(#cubo)}
+.lcdbg{fill:#1a1110}
+.lcd{fill:#ff7a2e;filter:drop-shadow(0 0 2px #ff5a10)}
+.jan{fill:#3f4045;stroke:#303135;stroke-width:1.5;stroke-linejoin:round}
+.jan{transition:fill .4s}
+.lit .jan{fill:#16171a;stroke:#101113}
+.tela .jan{fill:#14171b;stroke:#2a2f36}
+/* luzes-espia do Astra: o símbolo é que acende (apagado, quase não aparece) */
+.lamp .sym{fill:var(--c);stroke:var(--c);opacity:.07;stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
+.lamp .sym text{font:700 11px Arial,sans-serif;text-anchor:middle;dominant-baseline:central;stroke-width:.4}
+.lamp.on .sym{opacity:1;filter:drop-shadow(0 0 3px var(--c))}
+.lamp.on.blink .sym{animation:bl .7s steps(1) infinite}
+@keyframes bl{50%{opacity:.07}}
+.nf{fill:none!important}
+.tr{stroke:none!important}
+#knob{cursor:pointer}
