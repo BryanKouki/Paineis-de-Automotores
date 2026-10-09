@@ -152,7 +152,7 @@ const Astra = (() => {
       <label><input id="semLimite" type="checkbox"> Desbloquear limite de velocidade</label></div>
     <label>Combustível <input id="comb" type="range" min="0" max="${TANQUE}" value="0"><output id="combO"></output></label>
     <label>Temperatura <input id="temp" type="range" min="50" max="130" value="50"><output id="tempO"></output></label>
-    <label>Tempo <select id="mult"><option value="1">1× (real)</option><option value="20" selected>20×</option><option value="200">200×</option></select></label>
+    <label>Tempo <select id="mult"><option value="1" selected>1× (real)</option><option value="20">20×</option><option value="200">200×</option></select></label>
     <button id="reset">Zerar parcial</button>
   </div>
   <div id="luzes"><button id="luz" aria-pressed="false">💡 Iluminação</button><button id="todas">Todas as luzes</button></div>`;
@@ -160,7 +160,8 @@ const Astra = (() => {
   // Astra 2.0 8V Flexpower (gasolina) para o controle de videogame. Motor, peso, pneus e aerodinâmica são da ficha técnica;
   // as relações do câmbio (F17 WR) e do diferencial não achei em fonte confiável e são as que se costuma citar.
   const VEICULO = { cv: 133, rpmCv: 5600, kgfm: 18.9, rpmKgfm: 2600, rpmMax: 6400, lenta: 900, marchas: [3.73, 1.96, 1.32, .95, .76], re: 3.31, final: 3.74,
-    pneu: [205, 55, 16], kg: 1180, cxA: .624, inercia: .16 };
+    pneu: [205, 55, 16], kg: 1180, cxA: .624, inercia: .16, tanque: 52,
+    chave: { ateLigar: ['bat', 'oleo', 'inj'], teste: ['imob', 'airbag', 'abs'] } }; // luzes que o miolo da ignição comanda (como no manual)
 
   /**
    * Desenha o painel dentro de `target` (um <g> do SVG) e liga os controles em #ctl.
@@ -184,6 +185,13 @@ const Astra = (() => {
     $('todas').onclick = () => { const on = lightBtns.some(b => b.getAttribute('aria-pressed') === 'false'); lightBtns.forEach(b => b.set(on)); };
     $('luz').onclick = () => { const on = root.classList.toggle('lit'); document.body.classList.toggle('lit', on); $('luz').setAttribute('aria-pressed', on); };
 
+    // indicador de troca de marcha: vem desligado, como o interruptor do carro; ativado, a luz acende sozinha na hora de trocar
+    let trocaAtiva = false;
+    const btnTroca = document.createElement('button');
+    btnTroca.textContent = 'Indicador de troca de marcha'; btnTroca.style.setProperty('--c', A); btnTroca.setAttribute('aria-pressed', false);
+    btnTroca.onclick = () => { trocaAtiva = !trocaAtiva; btnTroca.setAttribute('aria-pressed', trocaAtiva); upd(); };
+    $('todas').before(btnTroca);
+
     // aviso de velocidade máxima: o botão grava a velocidade do momento; passou dela, a luz verde pisca
     let limite = null;
     const btnLim = document.createElement('button');
@@ -197,7 +205,7 @@ const Astra = (() => {
       rot('nRpm', rpmAngle(rpm)); rot('nVel', velAngle(vel));
       rot('nFuel', smallAngle(comb / TANQUE)); rot('nTemp', smallAngle((temp - 50) / 80));
       $('i_reserva').classList.toggle('on', comb <= RESERVA); // a luz da reserva acende sozinha
-      $('i_marcha').classList.toggle('on', rpm >= MARCHA_RPM && vel <= MARCHA_VEL);
+      $('i_marcha').classList.toggle('on', trocaAtiva && rpm >= MARCHA_RPM && vel <= MARCHA_VEL);
       $('i_velmax').classList.toggle('on', limite != null);
       $('i_velmax').classList.toggle('blink', limite != null && vel > limite);
       btnLim.textContent = limite == null ? 'Programar velocidade máxima' : `Velocidade máxima: ${limite} km/h`;

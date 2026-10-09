@@ -142,7 +142,7 @@ const CG = (() => {
     <div class="vel"><label>Velocidade <input id="vel" type="range" min="0" max="140" step="1" value="0"><output id="velO"></output></label>
       <label><input id="semLimite" type="checkbox"> Desbloquear limite de velocidade</label></div>
     <label>Combustível <input id="comb" type="range" min="0" max="100" value="0"><output id="combO"></output></label>
-    <label>Tempo <select id="mult"><option value="1">1× (real)</option><option value="20" selected>20×</option><option value="200">200×</option></select></label>
+    <label>Tempo <select id="mult"><option value="1" selected>1× (real)</option><option value="20">20×</option><option value="200">200×</option></select></label>
     <label><input id="boia" type="checkbox"> Mau contato na boia de combustível</label>
   </div>
   <div id="luzes"><button id="chaveBtn" aria-pressed="false">🔑 Ignição</button><button id="luz" aria-pressed="false">💡 Iluminação</button></div>`;
@@ -151,7 +151,7 @@ const CG = (() => {
   // (dados da geração 2000 a 2004). O peso é aproximado e as relações (primária 4,055, coroa 43 e pinhão 14)
   // não achei em fonte confiável e são as que se costuma citar; final = primária x coroa/pinhão. Moto não tem ré.
   const VEICULO = { cv: 12.5, rpmCv: 9000, kgfm: 1, rpmKgfm: 7500, rpmMax: 9800, lenta: 1400, marchas: [2.769, 1.722, 1.272, 1, .815], re: 0, final: 4.055 * 43 / 14,
-    pneu: [90, 90, 18], kg: 114, cxA: .6, inercia: .006 };
+    pneu: [90, 90, 18], kg: 114, cxA: .6, inercia: .006, tanque: 13 };
 
   /**
    * Desenha o painel dentro de `target` (um <g> do SVG) e liga os controles em #ctl.

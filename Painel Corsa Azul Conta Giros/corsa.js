@@ -163,7 +163,7 @@ const Corsa = (() => {
       <label><input id="semLimite" type="checkbox"> Desbloquear limite de velocidade</label></div>
     <label>Combustível <input id="comb" type="range" min="0" max="46" value="0"><output id="combO"></output></label>
     <label>Temperatura <input id="temp" type="range" min="50" max="110" value="50"><output id="tempO"></output></label>
-    <label>Tempo <select id="mult"><option value="1">1× (real)</option><option value="20" selected>20×</option><option value="200">200×</option></select></label>
+    <label>Tempo <select id="mult"><option value="1" selected>1× (real)</option><option value="20">20×</option><option value="200">200×</option></select></label>
     <button id="reset">Zerar parcial</button>
   </div>
   <div id="luzes"><button id="luz" aria-pressed="false">💡 Iluminação</button><button id="todas">Todas as luzes</button></div>`;
@@ -171,7 +171,8 @@ const Corsa = (() => {
   // Corsa 1.6 8V MPFI para o controle de videogame. Motor, peso e aerodinâmica são da ficha técnica;
   // as relações do câmbio (F15 WR) e do diferencial não achei em fonte confiável e são as que se costuma citar.
   const VEICULO = { cv: 92, rpmCv: 5600, kgfm: 13, rpmKgfm: 2600, rpmMax: 6400, lenta: 900, marchas: [3.73, 1.96, 1.32, .95, .76], re: 3.31, final: 3.94,
-    pneu: [165, 70, 13], kg: 983, cxA: .658, inercia: .14 };
+    pneu: [165, 70, 13], kg: 983, cxA: .658, inercia: .14, tanque: 46,
+    chave: { ateLigar: ['bat', 'oleo', 'inj'], teste: ['abs', 'airbag'] } }; // luzes que o miolo da ignição comanda
 
   /**
    * Desenha o painel dentro de `target` (um <g> do SVG) e liga os controles em #ctl.

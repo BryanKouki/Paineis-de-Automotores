@@ -31,7 +31,7 @@ No seletor, escolha o painel e a versão. O botão **← Painéis** volta para a
 Embaixo de cada painel ficam os controles da simulação:
 
 - **Sliders** de velocidade, RPM, combustível e temperatura (os que o painel tiver).
-- **Tempo**: acelera o hodômetro (1×, 20× ou 200×), porque em tempo real ele leva 36 s para andar 1 km a 100 km/h.
+- **Tempo**: começa em 1× (tempo real) e acelera o hodômetro e o consumo de combustível (20× ou 200×), porque em tempo real o hodômetro leva 36 s para andar 1 km a 100 km/h.
 - **Desbloquear limite de velocidade**: libera o slider até 500 km/h. O ponteiro passa do fim da escala e para onde encontrar um obstáculo, como o pino de zerar o parcial no Corsa.
 - **Iluminação** e um botão para cada **luz-espia**.
 - Cada painel tem ainda o que é dele: pino de zerar o parcial, miolo de ignição, e assim por diante.
@@ -53,9 +53,13 @@ O controle segue o mapeamento do Gran Turismo 7, com as setas no direcional em v
 | Setas | A / D | Direcional esquerda/direita |
 | Farol alto | F | Direcional para cima |
 | Faróis (iluminação do painel) | L | L3 |
-| Ignição (na CG) | I | Options |
+| Ignição e partida | I | Options |
+
+Nos carros o motor precisa ser ligado: o miolo da ignição fica no canto dos controles, com as posições B, I, II e III. Clique numa marca para girar até ela; em II acendem as luzes de bateria, óleo e injeção, e segurando a III o motor pega (o giro sobe a uns 1.100 rpm e volta para a marcha lenta). A tecla I faz o mesmo em sequência: liga a ignição, dá a partida e, com o motor funcionando, desliga. Na CG o miolo fica no próprio painel e basta ligar o contato.
 
 As marchas são em sequência: ré, neutro, 1ª e assim por diante. Como no jogo, a redução é recusada se o giro fosse passar do limite. No limite de giro o motor corta e o ponteiro fica batendo, em neutro ou engatado.
+
+Dirigindo, o combustível é gasto de verdade: o tanque desce conforme o esforço do motor. Com o tanque praticamente vazio o motor engasga por alguns segundos e morre; o giro zera e o veículo vai perdendo velocidade. Para abastecer, mexa no slider de combustível; nos carros, depois de uma pane seca, é preciso dar a partida de novo. Os painéis abrem com o tanque em zero, então abasteça antes de sair.
 
 Potência, torque, peso, pneus e aerodinâmica vêm das fichas técnicas (Corsa 1.6 8V, Astra 2.0 8V e CG 125 Titan 2000). A marcha lenta dos carros fica em 900 rpm. As relações de câmbio e de diferencial são as que se costuma citar para esses modelos; não foram conferidas em manual.
 
