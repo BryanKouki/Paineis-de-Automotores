@@ -49,6 +49,7 @@ O relógio é o do computador. O cartão de mensagem e o mapa são só visuais; 
 
 ```
 index.html                   seletor de painéis
+versoes.js                   versão do projeto e de cada painel
 Paineis de Automotores.exe   abre o seletor e faz a ponte com a mídia do Windows
 launcher/                    código-fonte do executável, ícone e script de compilação
 logos/                       emblemas usados no seletor
@@ -58,6 +59,10 @@ Painel .../                  uma pasta por painel: o .js e o .css dele e as trê
 Em cada pasta de painel, `icones.js` (símbolos das luzes-espia) e `multimidia.js` (tocador e cartões) são cópias do mesmo arquivo, para a pasta funcionar sozinha.
 
 Para um painel novo aparecer no seletor, crie a pasta dele com as três páginas e acrescente uma linha na lista `PAINEIS` do `index.html`.
+
+## Versões
+
+A versão aparece no canto de cima de cada janela: no seletor é a do projeto (a mesma do release) e, em cada painel, a dele. Os números ficam todos no `versoes.js`; para lançar uma versão nova, mude ali, crie a tag (por exemplo `v1.1`) e anexe o `.zip` da pasta ao release.
 
 ## Recompilar o executável
 
