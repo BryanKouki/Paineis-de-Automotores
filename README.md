@@ -1,6 +1,6 @@
 # Painéis de Automotores
 
-Painéis de instrumentos de carros e motos refeitos do zero em HTML/SVG, interativos, pensados para telas de painel digital (como o Ghost Dashboard). Cada painel é desenhado em cima de fotos e manuais do original: escalas, números, ponteiros, luzes-espia e hodômetro se comportam como no veículo de verdade.
+Painéis de instrumentos de carros e motos refeitos do zero em HTML/SVG, interativos, pensados para telas de painel digital. Cada painel é desenhado em cima de fotos e manuais do original: escalas, números, ponteiros, luzes-espia e hodômetro se comportam como no veículo de verdade.
 
 Não usa nenhuma biblioteca: é só HTML, CSS e JavaScript, e roda direto do arquivo. A coleção vai crescendo; cada painel novo é uma pasta.
 
@@ -75,7 +75,7 @@ launcher\compilar.cmd
 ## Limitações
 
 - Os símbolos das luzes e alguns detalhes são desenhos simplificados, não a arte original.
-- As páginas foram testadas em navegador (Chrome/Edge), não dentro do Ghost Dashboard.
+- As páginas foram testadas em navegador (Chrome/Edge), não em uma tela de painel digital de verdade.
 - A resolução 1920×720 das versões Dashboard é uma escolha; o SVG se ajusta a outros tamanhos de tela.
 - A ponte com a música do computador só existe no Windows 10 (1809 ou mais novo) e 11.
 
