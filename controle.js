@@ -13,14 +13,14 @@ const Controle = (() => {
     dir: ['Direção', '← →', 'Analógico esquerdo', { e: 0, r: 0, x: -1 }],
     acel: ['Acelerar', 'W', 'R2', { b: 7 }], freio: ['Frear', 'S', 'L2', { b: 6 }],
     sobe: ['Subir marcha', 'E', '✕', { b: 0 }], desce: ['Descer marcha', 'Q', '□', { b: 2 }],
-    mao: ['Freio de mão', 'Espaço', '○', { b: 1 }], re: ['Ré (parado)', 'R', '△', { b: 3 }],
+    embr: ['Embreagem', 'Shift', 'L1', { b: 4 }], mao: ['Freio de mão', 'Espaço', '○', { b: 1 }], re: ['Ré (parado)', 'R', '△', { b: 3 }],
     ignicao: ['Ignição e partida', 'I', 'Options', { b: 9 }],
     setaE: ['Seta esquerda', 'A', 'Direcional ←', { b: 14 }], setaD: ['Seta direita', 'D', 'Direcional →', { b: 15 }],
     alto: ['Farol alto', 'F', 'Direcional ↑', { b: 12 }], farol: ['Faróis (iluminação)', 'L', 'L3', { b: 10 }],
   };
   // teclas, pela posição no teclado (e.code): as de um toque e as de segurar
   const TOQUES = { KeyE: 'sobe', KeyQ: 'desce', KeyR: 're', KeyI: 'ignicao', KeyL: 'farol', KeyF: 'alto', KeyA: 'setaE', KeyD: 'setaD' };
-  const SEGURAR = { acel: 'KeyW', freio: 'KeyS', mao: 'Space', esq: 'ArrowLeft', dirt: 'ArrowRight' };
+  const SEGURAR = { acel: 'KeyW', freio: 'KeyS', embr: 'ShiftLeft', mao: 'Space', esq: 'ArrowLeft', dirt: 'ArrowRight' };
   const G = 9.81, AR = 1.2, CONDUTOR = 75, RENDIMENTO = .9;
   // pneus em asfalto seco: aderência e rigidez (por unidade de carga) ao escorregar no sentido da roda e de lado. De lado, a
   // dianteira cede mais que a traseira (a direção e a suspensão também cedem) e tem um pouco menos de aderência (a suspensão
@@ -307,7 +307,9 @@ const Controle = (() => {
       acelT = pedal(acelT, SEGURAR.acel, 1); freioT = pedal(freioT, SEGURAR.freio, .78);
       const curso = x => Math.max(0, Math.min(1, x)), acelP = curso(le(pads, 'acel')), freioP = curso(le(pads, 'freio'));
       const acel = Math.max(acelP, acelT), freio = Math.max(freioP, freioT), mao = le(pads, 'mao') > .5 || seguras.has(SEGURAR.mao);
-      if (toques.size || seguras.size || mao || acelP > .1 || freioP > .1) ativa();
+      // embreagem: pisada (além da metade do curso), solta o motor das rodas. Não é preciso pisar para trocar de marcha
+      const embr = le(pads, 'embr') > .5 || seguras.has(SEGURAR.embr);
+      if (toques.size || seguras.size || mao || embr || acelP > .1 || freioP > .1) ativa();
       if (!simulando) { tocaSom(0, 0, 0); return; }
 
       // marchas em sequência (ré, neutro, 1ª…). Como no jogo, não reduz se o giro passaria do limite nem engata a ré andando
@@ -390,7 +392,7 @@ const Controle = (() => {
       // Motor sem corte (v.semCorte, como o varetado da CG): não corta nada; perto do giro máximo as válvulas flutuam e ele vai
       // perdendo força até não subir mais
       if (v.semCorte) cortando = false;
-      else if (rpm >= v.rpmMax) cortando = true; else if (rpm < v.rpmMax - (marcha ? 150 : 400)) cortando = false;
+      else if (rpm >= v.rpmMax) cortando = true; else if (rpm < v.rpmMax - (marcha && !embr ? 150 : 400)) cortando = false;
       const folego = v.semCorte ? Math.max(0, Math.min(1, (v.rpmMax - rpm) / (.05 * v.rpmMax))) : 1;
       const gas = cortando || engasgo ? 0 : acel * folego;
 
@@ -403,8 +405,8 @@ const Controle = (() => {
         let motor = 0, travada = false; // motor = torque que chega ao câmbio, N·m
         // motor parado: o giro zera (ou fica nos 230 rpm do motor de partida) e o veículo segue solto, perdendo velocidade
         if (!funciona) rpm += ((giraDesde !== null ? 230 : 0) - rpm) * Math.min(1, h * (giraDesde !== null ? 14 : 4));
-        // em neutro o motor gira livre: sobe pelo torque que sobra e cai pelo atrito; a marcha lenta segura o giro embaixo
-        else if (!marcha) rpm = Math.min(v.rpmMax + 150, Math.max(Math.min(engasgo ? lenta * .5 : lenta, rpm + 6000 * h), rpm + (gas * torque(rpm) - atrito(rpm)) / v.inercia * 30 / Math.PI * h));
+        // em neutro ou com a embreagem pisada o motor gira livre: sobe pelo torque que sobra e cai pelo atrito; a marcha lenta segura o giro embaixo
+        else if (!marcha || embr) rpm = Math.min(v.rpmMax + 150, Math.max(Math.min(engasgo ? lenta * .5 : lenta, rpm + 6000 * h), rpm + (gas * torque(rpm) - atrito(rpm)) / v.inercia * 30 / Math.PI * h));
         else if (acoplado >= lenta) { rpm = acoplado; motor = gas * torque(rpm) - (1 - gas) * atrito(rpm); travada = true; }
         else if (gas > .05) { rpm = lenta * (1 + 1.8 * gas); motor = gas * torque(rpm); } // saída: a embreagem patina
         else rpm += (lenta - rpm) * Math.min(1, h * 5);                                    // devagar demais sem acelerar: embreagem aberta

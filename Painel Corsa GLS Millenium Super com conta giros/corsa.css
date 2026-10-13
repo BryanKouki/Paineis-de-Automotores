@@ -20,16 +20,16 @@ button[aria-pressed=true]{background:var(--c,#ffc56e);color:#111;border-color:va
 .lit .face{fill:url(#faceLit)}
 .shade{fill:url(#shade);pointer-events:none}
 .hole{fill:#1b2c47}
-.marks{transition:filter .4s}
-.marks text{text-rendering:geometricPrecision;fill:#eef1f4;stroke:#eef1f4;stroke-width:.5;font:italic 700 26.5px Arial,Helvetica,sans-serif;text-anchor:middle;dominant-baseline:central;transition:fill .4s,stroke .4s}
-.marks text.m{font-size:19px;stroke-width:.4}
-.marks text.s{font-size:12.5px;stroke-width:.2}
-.marks text.xs{font-size:8px;stroke-width:0}
+.marks{transition:filter .4s;opacity:.999}
+.marks text{text-rendering:geometricPrecision;fill:#eef1f4;stroke:none;font:italic 700 26.5px Arial,Helvetica,sans-serif;text-anchor:middle;dominant-baseline:central;transition:fill .4s,stroke .4s}
+.marks text.m{font-size:19px}
+.marks text.s{font-size:12.5px}
+.marks text.xs{font-size:8px}
 .marks line,.marks .ic{stroke:#eef1f4;transition:stroke .4s}
 .marks .ic{fill:none;stroke-width:1.8}
 .marks .icf{fill:#eef1f4;stroke:none;transition:fill .4s}
 /* iluminação: âmbar leve, só na escala — o ponteiro continua branco */
-.lit .marks text{fill:#ffc56e;stroke:#ffc56e}
+.lit .marks text{fill:#ffc56e}
 .lit .marks .icf{fill:#ffc56e}
 .lit .marks line,.lit .marks .ic{stroke:#ffc56e}
 .lit .marks{filter:drop-shadow(0 0 3px #ffa63c)}
@@ -40,6 +40,7 @@ button[aria-pressed=true]{background:var(--c,#ffc56e);color:#111;border-color:va
 .marks .low .ic{stroke:#ff3b30!important}
 .marks .low{filter:drop-shadow(0 0 4px #ff3b30)}
 .needle{fill:#eeede4;stroke:#b9b6a6;stroke-width:.5;transition:transform .25s ease-out;filter:drop-shadow(1.5px 3px 2px #0009)}
+.drum{opacity:.999}
 .drum .dwin{fill:#0c0e11}
 .drum text{fill:#ecece6;font:19px Arial,Helvetica,sans-serif;text-anchor:middle}
 .drum .tenth rect{fill:#cbc8ab}

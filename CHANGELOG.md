@@ -8,15 +8,17 @@
 - **Qualquer volante, pedaleira, câmbio ou controle.** Na lista de comandos, clique num comando e acione o botão, o pedal ou o volante para ligá-lo; vale qualquer aparelho que o navegador reconheça, inclusive vários ao mesmo tempo. As ligações ficam gravadas no navegador, e "Restaurar padrão" volta ao mapeamento acima. Com "Volante (direção direta)" o eixo comanda direto o esterço das rodas.
 - **Curvas e aderência.** Os pneus de cada eixo têm aderência limitada, dividida entre acelerar, frear e fazer curva. Uma curva gasta velocidade e derruba o giro, tanto mais quanto mais fechada. No limite aparece um aviso ao lado da marcha: "Patinando" (o giro e o velocímetro sobem mais que o veículo), "Rodas travadas" (sem ABS; com as rodas da frente travadas o velocímetro cai a zero), "Saindo de frente" e "Saindo de traseira" (tirar o pé, frear ou puxar o freio de mão no meio da curva solta a traseira e o veículo pode rodar). No analógico e no teclado o esterço máximo diminui com a velocidade, como nos jogos.
 - **Som do motor.** Dirigindo, o painel toca o som do motor de cada veículo: marcha lenta, subida de giro, corte e motor de partida, com volume e brilho acompanhando o acelerador. Abre sempre desligado: o botão de alto-falante ao lado da marcha liga, e ao lado dele aparece o slider de volume. Os sons foram gravados no Engine Simulator com motores montados para o Corsa 1.6 8V, o Astra 2.0 8V e a CG 125 (pasta `motores/`).
+- **Embreagem.** Shift esquerdo no teclado ou L1 no controle (ou um pedal, pela lista de comandos): pisada, solta o motor das rodas. Não é obrigatória; as marchas continuam trocando sem ela.
 - **CG 125 sem corte de giro.** O motor varetado da CG não tem corte: perto do giro máximo ele vai perdendo força até não subir mais, e o som não cai.
 
 ### Mudanças
 
 - **Todos:** o velocímetro passou a ler a roda dianteira, como no veículo: acelerando forte ele marca um pouco acima da velocidade real, e patinando ou travando a roda, bem diferente.
+- **Corsa e Astra:** ao ligar a ignição, as luzes de ABS (nos dois) e de airbag (no Corsa) não acendem mais no teste de 3 segundos; no Astra o teste ficou com imobilizador e airbag.
 - **Astra:** na partida o giro sobe a 1.500 rpm antes de voltar para a marcha lenta.
 - **Corsa:** nos mostradores de combustível e temperatura o eixo do ponteiro fica na vertical do centro, com a escala e os símbolos simétricos, e os números ficam na direção dos traços.
 - **Corsa:** números dos mostradores em negrito, como no painel original; no conta-giros ganharam mais folga até os traços.
-- **Corsa e Astra:** em tamanhos pequenos os números saíam com o contorno desencontrado do algarismo (um traço duplicado por dentro); corrigido.
+- **Todos:** em tamanhos pequenos os números dos mostradores saíam borrados, com um traço duplicado e franjas coloridas nas bordas; agora são desenhados só com o preenchimento, suavizado em tons de cinza.
 
 ### Observações
 

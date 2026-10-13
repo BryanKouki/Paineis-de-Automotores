@@ -49,6 +49,7 @@ Um controle comum (PlayStation, Xbox ou compatível) já sai funcionando, com o 
 | Freio | S | L2 |
 | Sobe marcha | E | ✕ |
 | Desce marcha | Q | □ |
+| Embreagem (segurando; não é preciso para trocar de marcha) | Shift | L1 |
 | Freio de mão (segurando) | Espaço | ○ |
 | Ré (com o veículo parado) | R | △ |
 | Setas | A / D | Direcional esquerda/direita |

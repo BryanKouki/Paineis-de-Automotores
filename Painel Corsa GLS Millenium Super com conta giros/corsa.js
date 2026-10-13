@@ -185,7 +185,7 @@ const Corsa = (() => {
   const VEICULO = { cv: 92, rpmCv: 5600, kgfm: 13, rpmKgfm: 2600, rpmMax: 6400, lenta: 900, marchas: [3.73, 1.96, 1.32, .95, .76], re: 3.31, final: 3.94,
     pneu: [165, 70, 13], kg: 983, cxA: .658, inercia: .14, tanque: 46,
     entreEixos: 2.443, frente: .61, hcg: .53, tracao: 'D', freioDiant: .85, esterco: .6,
-    chave: { ateLigar: ['bat', 'oleo', 'inj'], teste: ['abs', 'airbag'] } }; // luzes que o miolo da ignição comanda
+    chave: { ateLigar: ['bat', 'oleo', 'inj'], teste: [] } }; // luzes que o miolo da ignição comanda
 
   /**
    * Desenha o painel dentro de `target` (um <g> do SVG) e liga os controles em #ctl.

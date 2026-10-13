@@ -164,7 +164,7 @@ const Astra = (() => {
   const VEICULO = { cv: 133, rpmCv: 5600, kgfm: 18.9, rpmKgfm: 2600, rpmMax: 6400, lenta: 900, marchas: [3.73, 1.96, 1.32, .95, .76], re: 3.31, final: 3.74,
     pneu: [205, 55, 16], kg: 1180, cxA: .624, inercia: .16, tanque: 52, partida: 1500, // partida = giro a que o motor sobe ao pegar
     entreEixos: 2.614, frente: .61, hcg: .54, tracao: 'D', freioDiant: .85, esterco: .6,
-    chave: { ateLigar: ['bat', 'oleo', 'inj'], teste: ['imob', 'airbag', 'abs'] } }; // luzes que o miolo da ignição comanda (como no manual)
+    chave: { ateLigar: ['bat', 'oleo', 'inj'], teste: ['imob', 'airbag'] } }; // luzes que o miolo da ignição comanda (como no manual)
 
   /**
    * Desenha o painel dentro de `target` (um <g> do SVG) e liga os controles em #ctl.

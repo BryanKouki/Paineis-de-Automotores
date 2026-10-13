@@ -48,24 +48,37 @@ assert acertos >= .55 * usa.sum(), 'não achei a subida de giro na gravação'
 quando = lambda rpm: tc[0] + (rpm - R0) / K  # instante em que a subida passa por esse giro
 
 def laco(som, n_ciclos, amostras_ciclo):
-    """corta um número inteiro de ciclos e funde a ponta no começo, para o laço não estalar"""
-    n = int(round(n_ciclos * amostras_ciclo)); f = int(.03 * FS)
+    """corta perto de um número inteiro de ciclos, no ponto em que o som volta a ficar igual ao começo, e funde a ponta no
+    começo, para o laço não estalar nem pular"""
+    f = int(.03 * FS); jan = int(max(2 * amostras_ciclo, .04 * FS)); n0 = int(round(n_ciclos * amostras_ciclo))
+    # o giro medido tem um erro pequeno, que ao fim de dezenas de ciclos vira um pedaço de ciclo: procura a emenda certa em volta
+    inicio = som[:jan] - som[:jan].mean()
+    def casa(n): t = som[n:n + jan] - som[n:n + jan].mean(); return float((inicio * t).sum() / (np.sqrt((inicio ** 2).sum() * (t ** 2).sum()) + 1e-12))
+    n = max(range(int(n0 - 1.5 * amostras_ciclo), int(n0 + 1.5 * amostras_ciclo)), key=casa)
+    emendas.append(casa(n))                                            # 1 = o fim continua igual ao começo: emenda inaudível
     corpo = som[:n].copy(); rampa = np.linspace(0, 1, f)
     corpo[:f] = corpo[:f] * rampa + som[n:n + f] * (1 - rampa)
     return corpo
 
-lacos = []
+lacos, emendas = [], []
 # marcha lenta: o giro já é constante; mede o ciclo e corta cerca de 1 segundo
 t0 = marcas['lenta'] + 1
 assert np.sqrt((x[int(t0 * FS):int((t0 + 2) * FS)] ** 2).mean()) > .02, 'o motor não ficou na marcha lenta (trecho mudo): morreu ou não pegou'
 f, _ = ciclo(t0, 2)
 rpm_lenta = min((f * 120 / m for m in (1, 2, 4, 8)), key=lambda r: abs(r - lenta_esp))
 cic = FS * 120 / rpm_lenta
-lacos.append((rpm_lenta, laco(x[int(t0 * FS):], round(1.0 * FS / cic), cic)))
+# a lenta oscila um pouco: tenta vários começos dentro dela e fica com o de melhor emenda
+tentativas = []
+for ini in np.arange(t0, t0 + 3.01, .25):
+    som = laco(x[int(ini * FS):], round(1.0 * FS / cic), cic); tentativas.append((emendas.pop(), som))
+melhor_lenta = max(tentativas, key=lambda t: t[0])
+emendas.append(melhor_lenta[0]); lacos.append((rpm_lenta, melhor_lenta[1]))
 # subida: em volta de cada giro alvo, o trecho é reamostrado para o giro ficar constante (desfaz a subida dentro do laço)
 alvo = np.ceil(max(rpm_lenta * 1.4, R0) / passo) * passo             # abaixo de R0 a subida ainda não tinha começado
-while alvo <= patamar * .97:
-    c = quando(alvo); cic = FS * 120 / alvo; n_c = round(.7 * FS / cic); dur = (n_c * cic + .04 * FS) / FS
+# o último laço para meio segundo antes de o motor chegar ao corte: dentro do corte o som falha e o laço sairia quebrado
+teto = (R0 + K * (t_corte - tc[0]) if t_corte else patamar) - K * .5
+while alvo + K * .4 <= teto:
+    c = quando(alvo); cic = FS * 120 / alvo; n_c = round(.7 * FS / cic); dur = ((n_c + 4) * cic + .1 * FS) / FS
     u = np.arange(int(dur * FS)) / FS                                # tempo no laço, com o giro constante
     k = K / 60.0; r = alvo / 60.0                                    # em voltas por segundo
     tau = (-r + np.sqrt(r * r + 2 * k * r * u)) / k                  # tempo na gravação com as mesmas voltas dadas
@@ -83,4 +96,4 @@ open(saida, 'w', encoding='utf-8', newline='\n').write(
     '// Som do motor: laços gravados no Engine Simulator (motores/*.mr), um por faixa de giro, em 16 bits a 22.050 Hz.\n'
     '// Gerado por motores/montar.py; cada item é [giro do laço, áudio em base64]. O controle.js toca os dois vizinhos do giro atual.\n'
     'const SOM_MOTOR = { taxa: %d, lacos: [\n%s\n] };\n' % (FS // 2, linhas))
-print('laços:', [round(r) for r, _ in lacos], '| arquivo:', saida)
+print('laços (giro:emenda):', ' '.join('%d:%.2f' % (round(r), e) for (r, _), e in zip(lacos, emendas)), '| arquivo:', saida)
