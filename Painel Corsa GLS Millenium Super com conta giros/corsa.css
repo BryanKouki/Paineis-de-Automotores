@@ -21,7 +21,7 @@ button[aria-pressed=true]{background:var(--c,#ffc56e);color:#111;border-color:va
 .shade{fill:url(#shade);pointer-events:none}
 .hole{fill:#1b2c47}
 .marks{transition:filter .4s}
-.marks text{fill:#eef1f4;stroke:#eef1f4;stroke-width:.5;font:italic 26.5px Arial,Helvetica,sans-serif;text-anchor:middle;dominant-baseline:central;transition:fill .4s,stroke .4s}
+.marks text{text-rendering:geometricPrecision;fill:#eef1f4;stroke:#eef1f4;stroke-width:.5;font:italic 700 26.5px Arial,Helvetica,sans-serif;text-anchor:middle;dominant-baseline:central;transition:fill .4s,stroke .4s}
 .marks text.m{font-size:19px;stroke-width:.4}
 .marks text.s{font-size:12.5px;stroke-width:.2}
 .marks text.xs{font-size:8px;stroke-width:0}

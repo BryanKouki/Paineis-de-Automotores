@@ -8,16 +8,17 @@ const Corsa = (() => {
   // Ângulos em graus, 0 = para cima, horário positivo.
   const TACH = { cx: 415, cy: 261, r: 178, bevel: 13, holes: [[357.5, 260], [476, 262]] };
   const SPD  = { cx: 811, cy: 268, r: 174, bevel: 13, holes: [[742.5, 270], [874.6, 272]] };
-  // px,py = eixo do ponteiro (abaixo do centro do mostrador); a escala é concêntrica ao eixo
-  const FUEL = { cx: 144, cy: 390.5, r: 93, bevel: 16, px: 138.5, py: 431 };
-  const TEMP = { cx: 1069, cy: 414, r: 91.5, bevel: 16, px: 1061, py: 456 };
+  // px,py = eixo do ponteiro, 41 px abaixo do centro e na mesma vertical dele (na foto parece deslocado, mas é o ângulo da câmera);
+  // a escala é concêntrica ao eixo e simétrica em relação a essa vertical
+  const FUEL = { cx: 144, cy: 390.5, r: 93, bevel: 16, px: 144, py: 431.5 };
+  const TEMP = { cx: 1069, cy: 414, r: 91.5, bevel: 16, px: 1069, py: 455 };
   const G = { tach: TACH, spd: SPD, fuel: FUEL, temp: TEMP };
   const rpmAngle = rpm => -130 + rpm / 1000 * 37.3;
   // a escala começa em 20 e o ponteiro descansa num batente logo abaixo dela
   // com o limite desbloqueado o ponteiro passa do 220 no mesmo passo e trava ao bater no pino de zerar o parcial (perto de 249 km/h)
   const velAngle = v => Math.min(174.4, Math.max(-136.5, -135 + (v - 20) * 1.352));
   const fuelAngle = l => -45 + l * 2.25;                                  // 0 L na marca vermelha, 20 L no topo
-  const tempAngle = t => Math.min(50, Math.max(-51, -23 + (t - 90) * 4.2)); // frio = batente antes do 1º traço
+  const tempAngle = t => Math.min(50, Math.max(-51, -21 + (t - 90) * 4.2)); // frio = batente antes do 1º traço
   const RESERVA = 5; // litros: até aqui o ponteiro está na faixa vermelha
 
   const tick = (cx, cy, a, r1, r2, w, cls = '') => {
@@ -109,11 +110,15 @@ const Corsa = (() => {
     // Números: cada um fica na direção do seu traço, no raio rMax, e recua o que for preciso para não encostar no traço.
     // (Copiar a posição da foto fazia os da direita entrarem nos traços: a fonte real é mais estreita que a Arial.)
     const DIG = 26.5 * .556, CAP = 19; // largura de um algarismo e altura dos números na fonte dos mostradores
-    const num = (g, a, txt, rMax) => {
+    const num = (g, a, txt, rMax, tach) => {
       const s = Math.abs(Math.sin(a * RAD)), c = Math.abs(Math.cos(a * RAD)), w = String(txt).length * DIG + 3; // +3 = inclinação do itálico
-      return text(...P(g.cx, g.cy, Math.min(g.r * rMax, g.r * TICK_IN - 4 - (s * w + c * CAP) / 2), a), txt);
+      // no conta-giros: 4 px a mais de folga até o traço e o algarismo centrado pelo desenho, que fica acima e à direita do ponto
+      // de ancoragem (não tem perna abaixo da linha e é itálico). No velocímetro isso não cabe: o 80 e o 160 entrariam na janela
+      // do hodômetro
+      const [x, y] = P(g.cx, g.cy, Math.min(g.r * rMax, g.r * TICK_IN - (tach ? 8 : 4) - (s * w + c * CAP) / 2), a);
+      return tach ? text(x - 1.5, +y + 3, txt) : text(x, y, txt);
     };
-    for (let v = 0; v <= 7; v++) tach += num(TACH, rpmAngle(v * 1000), v, .765);
+    for (let v = 0; v <= 7; v++) tach += num(TACH, rpmAngle(v * 1000), v, .765, true);
     tach += text(418, 305.5, 'x 1000', 's') + text(418, 319, 'min⁻¹', 's');
 
     // velocímetro: os números de 3 algarismos do lado direito acabam mais para dentro, como no painel
@@ -122,12 +127,17 @@ const Corsa = (() => {
     for (let v = 20; v <= 220; v += 20) spd += num(SPD, velAngle(v), v, .735);
     spd += text(SPD.cx, 198.5, 'km', 's') + text(SPD.cx, 350.5, 'km/h', 's') + text(SPD.cx, 363.5, 'W=1134', 'xs');
 
+    // números dos mostradores pequenos: na direção do traço, com 4 px de folga antes dele (mesma conta dos grandes)
+    const sNum = (g, a, txt) => {
+      const sn = Math.abs(Math.sin(a * RAD)), c = Math.abs(Math.cos(a * RAD)), w = String(txt).length * 10.6 + 2;
+      return text(...P(g.px, g.py, 82 - 4 - (sn * w + c * 14) / 2, a), txt, 'm');
+    };
     const fuel = arc(FUEL.px, FUEL.py, 91.5, fuelAngle(0) - 6, fuelAngle(0) + 6, 23) + [10, 20, 30, 40].map(l => sTick(FUEL, fuelAngle(l), l % 20 === 0)).join('') +
-      text(143, 363, 20, 'm') + text(193, 377.5, 40, 'm') + text(220, 416, 'L', 'm') +
-      `<g id="pump" transform="translate(80,413) scale(1.2)"><path class="icf" fill-rule="evenodd" d="M-7-8h10v16h-10zM-5-6v5h6v-5z"/><path class="ic" d="M3-3h2.5q2 0 2 2v6"/></g>`;
+      sNum(FUEL, fuelAngle(20), 20) + sNum(FUEL, fuelAngle(40), 40) + text(214, 414, 'L', 'm') +
+      `<g id="pump" transform="translate(76,414) scale(1.2)"><path class="icf" fill-rule="evenodd" d="M-7-8h10v16h-10zM-5-6v5h6v-5z"/><path class="ic" d="M3-3h2.5q2 0 2 2v6"/></g>`;
     const temp = [85, 90, 95, 100, 105].map(t => sTick(TEMP, tempAngle(t), t % 10 === 0)).join('') + arc(TEMP.px, TEMP.py, 99, 43, 50.5, 20) +
-      text(1033.7, 393.1, 90, 'm') + text(1088.5, 389.5, 100, 'm') + text(995.6, 434.4, '°C', 'm') +
-      `<g transform="translate(1130,431) scale(1.2)"><path class="ic" d="M0-10v10M0-8h4M0-4h4M-10 8q2.5-3 5 0M5 8q2.5-3 5 0M-8 4h16"/><circle class="icf" cy="3" r="3"/></g>`;
+      sNum(TEMP, tempAngle(90), 90) + sNum(TEMP, tempAngle(100), 100) + text(1001, 435, '°C', 'm') +
+      `<g transform="translate(1135,433) scale(1.2)"><path class="ic" d="M0-10v10M0-8h4M0-4h4M-10 8q2.5-3 5 0M5 8q2.5-3 5 0M-8 4h16"/><circle class="icf" cy="3" r="3"/></g>`;
     return { tach, spd, fuel, temp };
   }
   const OVER = {
@@ -170,8 +180,11 @@ const Corsa = (() => {
 
   // Corsa 1.6 8V MPFI para o controle de videogame. Motor, peso e aerodinâmica são da ficha técnica;
   // as relações do câmbio (F15 WR) e do diferencial não achei em fonte confiável e são as que se costuma citar.
+  // Para as curvas: entre-eixos da ficha técnica; distribuição de peso, altura do centro de gravidade, divisão dos freios e
+  // esterço são valores típicos de um hatch pequeno de tração dianteira, não medidos neste carro.
   const VEICULO = { cv: 92, rpmCv: 5600, kgfm: 13, rpmKgfm: 2600, rpmMax: 6400, lenta: 900, marchas: [3.73, 1.96, 1.32, .95, .76], re: 3.31, final: 3.94,
     pneu: [165, 70, 13], kg: 983, cxA: .658, inercia: .14, tanque: 46,
+    entreEixos: 2.443, frente: .61, hcg: .53, tracao: 'D', freioDiant: .85, esterco: .6,
     chave: { ateLigar: ['bat', 'oleo', 'inj'], teste: ['abs', 'airbag'] } }; // luzes que o miolo da ignição comanda
 
   /**

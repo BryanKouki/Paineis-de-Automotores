@@ -1,10 +1,10 @@
 // Versões: a do projeto (a mesma do release no GitHub) e a de cada painel, pelo nome da pasta dele.
 // Para lançar uma versão nova, mude os números aqui: a etiqueta no canto de cada janela vem deste arquivo.
 const VERSOES = {
-  projeto: '1.1',
-  'Painel Corsa GLS Millenium Super com conta giros': '1.1',
-  'Painel Astra 2011 Branco': '1.1',
-  'Painel CG 125 2000': '1.1',
+  projeto: '1.2',
+  'Painel Corsa GLS Millenium Super com conta giros': '1.2',
+  'Painel Astra 2011 Branco': '1.2',
+  'Painel CG 125 2000': '1.2',
 };
 
 // etiqueta no canto de cima da janela: na página de um painel, a versão dele; no seletor, a do projeto

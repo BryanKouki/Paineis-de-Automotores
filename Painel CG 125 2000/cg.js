@@ -150,8 +150,11 @@ const CG = (() => {
   // CG 125 Titan 2000 para o controle e o teclado: motor OHV de 12,5 cv a 9.000 rpm e 1,0 kgf.m a 7.500 rpm, 5 marchas, pneu traseiro 90/90-18
   // (dados da geração 2000 a 2004). O peso é aproximado e as relações (primária 4,055, coroa 43 e pinhão 14)
   // não achei em fonte confiável e são as que se costuma citar; final = primária x coroa/pinhão. Moto não tem ré.
+  // Para as curvas: entre-eixos aproximado (1,31 m na CG 125 seguinte); distribuição de peso e altura do centro de gravidade com
+  // o piloto e divisão dos freios são valores típicos de uma moto pequena, não medidos nesta.
   const VEICULO = { cv: 12.5, rpmCv: 9000, kgfm: 1, rpmKgfm: 7500, rpmMax: 9800, lenta: 1400, marchas: [2.769, 1.722, 1.272, 1, .815], re: 0, final: 4.055 * 43 / 14,
-    pneu: [90, 90, 18], kg: 114, cxA: .6, inercia: .006, tanque: 13 };
+    pneu: [90, 90, 18], kg: 114, cxA: .6, inercia: .006, tanque: 13, semCorte: true, // motor varetado, sem corte de giro
+    entreEixos: 1.31, frente: .46, hcg: .62, tracao: 'T', freioDiant: .9, esterco: .6 };
 
   /**
    * Desenha o painel dentro de `target` (um <g> do SVG) e liga os controles em #ctl.
