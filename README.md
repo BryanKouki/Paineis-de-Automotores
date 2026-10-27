@@ -57,6 +57,7 @@ Um controle comum (PlayStation, Xbox ou compatível) já sai funcionando, com o 
 | Freio de mão (segurando) | Espaço | ○ |
 | Ré (com o veículo parado) | R | △ |
 | Setas | A / D | Direcional esquerda/direita |
+| Pisca-alerta | H | Share |
 | Farol alto | F | Direcional para cima |
 | Faróis (iluminação do painel) | L | L3 |
 | Ignição e partida | I | Options |

@@ -13,23 +13,23 @@
   const VEICULO = { cv: 92, rpmCv: 5600, kgfm: 13, rpmKgfm: 2600, rpmMax: 6800, lenta: 850, marchas: [3.73, 1.96, 1.32, .95, .76], re: 3.31, final: 3.94,
     pneu: [185, 55, 14], kg: 1000, cxA: .66, inercia: .13, tanque: TANQUE,
     entreEixos: 2.443, frente: .61, hcg: .5, tracao: 'D', freioDiant: .85, esterco: .6,
-    turbo: { pressao: 1.3, inicio: 2500, cheio: 4000 },
+    turbo: { pressao: 1.3, inicio: 2500, cheio: 4000, limite: 2.0 }, // acima de 2 bar por mais de 1,5 s o motor de série quebra
     chave: { ateLigar: ['bat', 'oleo', 'inj'], teste: [] } };
 
   // ---- controles (mesmo jeito dos outros painéis) ----
-  const LUZES = { alto: 'Farol alto', nebl: 'Neblina', seta: 'Setas', freio: 'Freio de mão', bat: 'Bateria', inj: 'Injeção', oleo: 'Óleo', cinto: 'Cinto', eletr: 'Eletrônica' };
+  const LUZES = { alto: 'Farol alto', nebl: 'Neblina', setaE: 'Seta esquerda', setaD: 'Seta direita', alerta: 'Pisca-alerta', freio: 'Freio de mão', bat: 'Bateria', inj: 'Injeção', oleo: 'Óleo', cinto: 'Cinto', eletr: 'Eletrônica' };
   $('ctl').innerHTML = `<div>
     <label>RPM <input id="rpm" type="range" min="0" max="7000" step="50" value="0"><output id="rpmO"></output></label>
     <label>Velocidade <input id="vel" type="range" min="0" max="260" step="1" value="0"><output id="velO"></output></label>
     <label>Combustível <input id="comb" type="range" min="0" max="${TANQUE}" value="0"><output id="combO"></output></label>
     <label>Temperatura <input id="temp" type="range" min="50" max="130" value="95"><output id="tempO"></output></label>
-    <label>Turbo <input id="turbo" type="range" min="-1" max="2" step=".01" value="0"><output id="turboO"></output></label>
+    <label>Turbo <input id="turbo" type="range" min="-1" max="3" step=".01" value="0"><output id="turboO"></output></label>
     <input id="tps" type="range" min="0" max="100" value="0" hidden>
     <label>Tempo <select id="mult"><option value="1" selected>1× (real)</option><option value="20">20×</option><option value="200">200×</option></select></label>
     <button id="reset">Zerar parcial</button>
   </div>
   <div id="luzes"><button id="luz" aria-pressed="false">💡 Iluminação</button><button id="todas">Todas as luzes</button></div>
-  <svg id="kouki" viewBox="-60 -60 120 120" role="slider" tabindex="0" aria-label="Regulagem do turbo" aria-valuemin="0.3" aria-valuemax="2" aria-valuenow="1.3">
+  <svg id="kouki" viewBox="-60 -60 120 120" role="slider" tabindex="0" aria-label="Regulagem do turbo" aria-valuemin="0.3" aria-valuemax="3" aria-valuenow="1.3">
     <defs>
       <radialGradient id="kAlu" cx=".4" cy=".32" r=".75"><stop offset="0" stop-color="#f4f5f6"/><stop offset=".55" stop-color="#cfd2d5"/><stop offset="1" stop-color="#9a9ea2"/></radialGradient>
       <linearGradient id="kAro" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9ebed"/><stop offset="1" stop-color="#7d8186"/></linearGradient>
@@ -48,24 +48,25 @@
     <text x="0" y="29" class="kM">KOUKI</text>
   </svg>
   <output id="kV" for="kouki">1,3 bar</output>
-  <input id="boostReg" type="range" min="0.3" max="2" step="0.1" value="1.3" hidden>`;
+  <input id="boostReg" type="range" min="0.3" max="3" step="0.1" value="1.3" hidden>`;
 
-  const lightBtns = Object.entries(LUZES).filter(([id]) => $('i_' + id) || (id === 'seta' && $('i_setaE'))).map(([id, rotulo]) => {
-    const alvos = id === 'seta' ? [$('i_setaE'), $('i_setaD')] : [$('i_' + id)];
+  const lightBtns = Object.entries(LUZES).filter(([id]) => $('i_' + id) || id === 'alerta').map(([id, rotulo]) => {
+    const alvos = id === 'alerta' ? [$('i_setaE'), $('i_setaD')] : [$('i_' + id)];
     const b = document.createElement('button'); b.textContent = rotulo; b.dataset.luz = id; b.setAttribute('aria-pressed', false);
     b.set = on => { alvos.forEach(a => a.classList.toggle('on', on)); b.setAttribute('aria-pressed', alvos[0].classList.contains('on')); };
     b.onclick = () => b.set(!alvos[0].classList.contains('on'));
     $('todas').before(b); return b;
   });
+  ['i_setaE', 'i_setaD'].forEach(id => $(id) && $(id).classList.add('pisca')); // as setas piscam
   $('todas').onclick = () => { const on = lightBtns.some(b => b.getAttribute('aria-pressed') === 'false'); lightBtns.forEach(b => b.set(on)); };
   $('luz').onclick = () => { const on = $('p').classList.toggle('lit'); $('luz').setAttribute('aria-pressed', on); };
 
-  // ---- botão KOUKI: arrastar em volta, rodinha do mouse ou setas; de 0,3 a 2 bar, em 270° de curso ----
+  // ---- botão KOUKI: arrastar em volta, rodinha do mouse ou setas; de 0,3 a 3 bar, em 270° de curso (passar de 2 bar quebra o motor) ----
   const kouki = $('kouki'), reg = $('boostReg');
-  const poeReg = b => { b = Math.round(lim(b, .3, 2) * 10) / 10; reg.value = b;
-    $('kNo').setAttribute('transform', `rotate(${f(-135 + (b - .3) / 1.7 * 270)})`); $('kV').textContent = br(b) + ' bar'; kouki.setAttribute('aria-valuenow', b); };
+  const poeReg = b => { b = Math.round(lim(b, .3, 3) * 10) / 10; reg.value = b;
+    $('kNo').setAttribute('transform', `rotate(${f(-135 + (b - .3) / 2.7 * 270)})`); $('kV').textContent = br(b) + ' bar'; kouki.setAttribute('aria-valuenow', b); };
   const angulo = e => { const r = kouki.getBoundingClientRect(); return Math.atan2(e.clientX - r.left - r.width / 2, r.top + r.height / 2 - e.clientY) * 180 / Math.PI; };
-  kouki.onpointerdown = e => { kouki.setPointerCapture(e.pointerId); kouki.onpointermove = m => poeReg(.3 + (lim(angulo(m), -135, 135) + 135) / 270 * 1.7); kouki.onpointermove(e); };
+  kouki.onpointerdown = e => { kouki.setPointerCapture(e.pointerId); kouki.onpointermove = m => poeReg(.3 + (lim(angulo(m), -135, 135) + 135) / 270 * 2.7); kouki.onpointermove(e); };
   kouki.onpointerup = kouki.onpointercancel = () => { kouki.onpointermove = null; };
   kouki.onwheel = e => { e.preventDefault(); poeReg(+reg.value - Math.sign(e.deltaY) * .1); };
   kouki.onkeydown = e => { const d = { ArrowUp: .1, ArrowRight: .1, ArrowDown: -.1, ArrowLeft: -.1 }[e.key]; if (d) { e.preventDefault(); poeReg(+reg.value + d); } };

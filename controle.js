@@ -16,10 +16,11 @@ const Controle = (() => {
     embr: ['Embreagem', 'Shift', 'L1', { b: 4 }], mao: ['Freio de mão', 'Espaço', '○', { b: 1 }], re: ['Ré (parado)', 'R', '△', { b: 3 }],
     ignicao: ['Ignição e partida', 'I', 'Options', { b: 9 }],
     setaE: ['Seta esquerda', 'A', 'Direcional ←', { b: 14 }], setaD: ['Seta direita', 'D', 'Direcional →', { b: 15 }],
+    alerta: ['Pisca-alerta', 'H', 'Share', { b: 8 }],
     alto: ['Farol alto', 'F', 'Direcional ↑', { b: 12 }], farol: ['Faróis (iluminação)', 'L', 'L3', { b: 10 }],
   };
   // teclas, pela posição no teclado (e.code): as de um toque e as de segurar
-  const TOQUES = { KeyE: 'sobe', KeyQ: 'desce', KeyR: 're', KeyI: 'ignicao', KeyL: 'farol', KeyF: 'alto', KeyA: 'setaE', KeyD: 'setaD' };
+  const TOQUES = { KeyE: 'sobe', KeyQ: 'desce', KeyR: 're', KeyI: 'ignicao', KeyL: 'farol', KeyF: 'alto', KeyA: 'setaE', KeyD: 'setaD', KeyH: 'alerta' };
   const SEGURAR = { acel: 'KeyW', freio: 'KeyS', embr: 'ShiftLeft', mao: 'Space', esq: 'ArrowLeft', dirt: 'ArrowRight' };
   const G = 9.81, AR = 1.2, CONDUTOR = 75, RENDIMENTO = .9;
   // pneus em asfalto seco: aderência e rigidez (por unidade de carga) ao escorregar no sentido da roda e de lado. De lado, a
@@ -136,6 +137,9 @@ const Controle = (() => {
     // turbo: pressão relativa na admissão (bar; abaixo de zero é vácuo, com a borboleta fechada). O torque cresce com a pressão
     // absoluta, com 10% de perda pelo ar mais quente depois de comprimido
     const TB = v.turbo, regulada = () => +(($('boostReg') || {}).value ?? TB.pressao);
+    // pressão acima do que o motor aguenta (v.turbo.limite) por mais de 1,5 s quebra o motor: ele apaga e não pega mais até o
+    // botão "Consertar motor"
+    let quebrado = false, acimaDesde = null;
     let pressao = 0, acelPico = 0; // acelPico: o acelerador mais fundo dos últimos instantes (cai 1 por segundo)
     const sopro = () => TB ? 1 + .9 * Math.max(0, pressao) : 1;
 
@@ -345,12 +349,26 @@ const Controle = (() => {
       $('pedal').onclick = () => { ativa(); chute = true; };
     }
 
+    const quebra = () => {
+      quebrado = true; acimaDesde = null; pressao = 0;
+      if (audio && !mudo) { // estouro: um baque grave curto
+        const t = audio.currentTime, n = audio.createBufferSource(), lp = audio.createBiquadFilter(), g = audio.createGain();
+        n.buffer = ruido; lp.type = 'lowpass'; lp.frequency.value = 600; g.gain.setValueAtTime(nivel * .9, t); g.gain.exponentialRampToValueAtTime(.001, t + .6);
+        n.connect(lp).connect(g).connect(audio.destination); n.start(t); n.stop(t + .65);
+      }
+      if ($('conserto')) $('conserto').hidden = false;
+    };
+    if (TB && TB.limite) {
+      $('luzes').insertAdjacentHTML('beforeend', '<button id="conserto" hidden>🔧 Consertar motor</button>');
+      $('conserto').onclick = () => { quebrado = false; $('conserto').hidden = true; };
+    }
     // regulador do som da válvula de alívio (só nos carros com turbo): abre e fecha num botão ao lado do alto-falante
     if (TB && som) {
       document.head.insertAdjacentHTML('beforeend', `<style>#alivioBtn{position:absolute;right:177px;bottom:100px;width:18px;height:18px;background:none;border:0;padding:0;color:#c9ccd0;opacity:.55;cursor:pointer;line-height:0}
 #alivioBtn:hover,#alivioBtn[aria-expanded=true]{opacity:1}
 #ctl #alivioReg[hidden]{display:none}
-#ctl #alivioReg{position:absolute;right:120px;bottom:124px;z-index:4;background:#1b1f24ee;border:1px solid #3a4350;border-radius:8px;padding:10px 12px;font:12px system-ui,sans-serif;color:#dde;display:grid;grid-template-columns:auto 120px 3.4em;gap:6px 8px;align-items:center}
+#ctl #alivioReg{position:absolute;right:120px;bottom:124px;z-index:4;background:#1b1f24ee;border:1px solid #3a4350;border-radius:8px;padding:10px 12px;font:12px system-ui,sans-serif;color:#dde;display:grid;grid-template-columns:auto 120px 3.6em;gap:6px 8px;align-items:center}
+#ctl #alivioReg input[type=range]{width:120px;margin:0}#ctl #alivioReg output{min-width:0;padding-left:6px;text-align:right}
 #alivioReg b{grid-column:1/-1;font-weight:600}#ctl #alivioReg div{grid-column:1/-1;display:flex;gap:6px;justify-content:flex-end;margin:4px 0 0}#ctl #alivioReg label{display:block}
 #alivioReg button{font:inherit;padding:4px 8px;border-radius:6px;border:1px solid #556;background:#262b31;color:inherit;cursor:pointer}</style>`);
       // engrenagem logo acima do regulador do turbo, no canto dos controles; a telinha abre em cima dela
@@ -406,7 +424,12 @@ const Controle = (() => {
       if (toques.has('re') && v.re && Math.abs(vx) < 1) marcha = -1;
 
       // luzes
-      if ((toques.has('setaE') || toques.has('setaD')) && luz('seta')) luz('seta').click();
+      // setas: a alavanca liga uma e desliga a outra; painéis com uma luz só para as duas (Corsa, Kadett) piscam a mesma
+      for (const [t, outra] of [['setaE', 'setaD'], ['setaD', 'setaE']]) if (toques.has(t)) {
+        if (luz(t)) { const on = luz(t).getAttribute('aria-pressed') !== 'true'; luz(t).set(on); if (on && luz(outra)) luz(outra).set(false); }
+        else if (luz('seta')) luz('seta').click();
+      }
+      if (toques.has('alerta') && luz('alerta')) luz('alerta').click();
       if (toques.has('alto') && luz('alto')) luz('alto').click();
       if (toques.has('farol')) $('luz').click();
       // as luzes do freio de mão, do neutro e as do miolo acompanham a simulação só no instante em que ela muda (puxou o freio,
@@ -426,9 +449,9 @@ const Controle = (() => {
         if (toques.has('ignicao')) { if (ligada() && !rodando) soltarEm = agora + 900; else if ($('chaveBtn')) $('chaveBtn').click(); }
         contato = ligada(); girando = contato && (apertado || agora < soltarEm);
       }
-      if (!contato || morto) rodando = false; // sem ignição ou depois da pane seca, só pega de novo dando a partida
+      if (!contato || morto || quebrado) rodando = false; // sem ignição ou depois da pane seca, só pega de novo dando a partida
       // o motor de partida gira o motor a uns 230 rpm; depois de 0,6 s girando, pega (se tiver combustível); no pedal, pega no chute
-      if (girando && !rodando) { giraDesde = giraDesde ?? agora; if (agora - giraDesde > 600 && litros > SECO) { rodando = true; pegouEm = agora; } }
+      if (girando && !rodando) { giraDesde = giraDesde ?? agora; if (agora - giraDesde > 600 && litros > SECO && !quebrado) { rodando = true; pegouEm = agora; } }
       else giraDesde = null;
       if (chute && contato && !rodando && litros > SECO) { rodando = true; pegouEm = agora; }
       chute = false;
@@ -489,6 +512,7 @@ const Controle = (() => {
         pressao += (alvo - pressao) * Math.min(1, dt * (alvo > pressao ? 1.4 : 5));
         // tirou o pé com o turbo cheio (o acelerador caiu quase todo em menos de meio segundo): a válvula de alívio abre e despeja
         // a pressão. No teclado o pedal sobe em uns 0,3 s, por isso a comparação é com o mais fundo dos últimos instantes
+        if (TB.limite && pressao > TB.limite && funciona) { acimaDesde = acimaDesde ?? agora; if (agora - acimaDesde > 1500) quebra(); } else acimaDesde = null;
         acelPico = Math.max(acel, acelPico - dt);
         if (acelPico - acel > .45 && pressao > .3) { alivio(pressao); pressao = Math.min(pressao, -.2); acelPico = acel; }
       }
@@ -546,7 +570,7 @@ const Controle = (() => {
         : esc[motriz][0] * sentido > 1.15 * PICO ? 'Patinando'
         : Math.abs(esc[1][1]) > 1.15 * PICO ? 'Saindo de traseira' : Math.abs(esc[0][1]) > 1.15 * PICO ? 'Saindo de frente' : '';
       if (perda) { perdaTexto = perda; perdaAte = agora + 400; }
-      $('aviso').textContent = morto ? 'Sem combustível' : secoDesde !== null ? 'Combustível acabando' : !rodando ? (contato ? 'Motor parado' : 'Ignição desligada') : agora < perdaAte ? perdaTexto : '';
+      $('aviso').textContent = quebrado ? 'Motor quebrado: pressão demais' : morto ? 'Sem combustível' : secoDesde !== null ? 'Combustível acabando' : !rodando ? (contato ? 'Motor parado' : 'Ignição desligada') : agora < perdaAte ? perdaTexto : '';
 
       // consumo: proporcional à potência que o motor entrega mais a que ele gasta para girar (rendimento de 33%, gasolina);
       // engatado e com o acelerador solto a injeção corta. O seletor "Tempo" acelera o consumo junto com o hodômetro

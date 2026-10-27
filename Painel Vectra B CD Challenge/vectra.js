@@ -67,7 +67,7 @@ const Vectra = (() => {
     neblinaD: ['Farol de neblina', '#2fd15a'], freio: ['Freio', '#ff3b30'], tc: ['Controle de tração', '#ffb020'],
     porta: ['Porta aberta', '#ffb020'], cruzeiro: ['Piloto automático', '#2fd15a'], inj: ['Injeção', '#ffb020'],
     velmax: ['Velocidade máxima', '#ffb020'], bomba: ['Reserva', '#ffb020'], oleo: ['Óleo', '#ff3b30'], airbag: ['Airbag', '#ff3b30'],
-    cinto: ['Cinto', '#ff3b30'], seta: ['Setas', '#2fd15a'],
+    cinto: ['Cinto', '#ff3b30'], setaE: ['Seta esquerda', '#2fd15a'], setaD: ['Seta direita', '#2fd15a'],
   };
   // [id, x, y] no desenho do manual (911x350) e as janelas dele; cada luz vai para a mesma fração da janela daqui
   const LUZES = [['neblinaT', 72, 277], ['abs', 112, 277], ['alto', 159, 277], ['bat', 205, 277], ['neblinaD', 261, 277], ['freio', 290, 277], ['tc', 316, 277],
@@ -75,7 +75,7 @@ const Vectra = (() => {
   const MANUAL = { b1: [51, 268, 227, 286], b2: [247, 268, 328, 286], b3: [347, 268, 431, 286], velmax: [631, 235, 701, 261], direita: [624, 270, 795, 294] };
   const naJanela = (x, y) => { const [k, o] = Object.entries(MANUAL).find(([, b]) => x >= b[0] - 3 && x <= b[2] + 3 && y >= b[1] - 15 && y <= b[3] + 15), n = M.caixas[k];
     return [n[0] + (x - o[0]) / (o[2] - o[0]) * (n[2] - n[0]), (n[1] + n[3]) / 2, k]; };
-  const lampada = (id, conteudo) => `<g id="i_${id}" class="luz${id === 'seta' ? ' blink' : ''}" style="--c:${LAMPS[id][1]}">${conteudo}</g>`;
+  const lampada = (id, conteudo) => `<g id="i_${id}" class="luz${id.startsWith('seta') ? ' blink' : ''}" style="--c:${LAMPS[id][1]}">${conteudo}</g>`;
   // as de baixo à direita (óleo, airbag, cinto) quase enchem a altura da janela, como na foto de noite
   const luz = ([id, x0, y0]) => { const [x, y, k] = naJanela(x0, y0), e = k === 'direita' ? 1.25 : .72;
     return lampada(id, `<path class="simb" fill-rule="evenodd" transform="translate(${n1(x)},${n1(y)}) scale(${e})" d="${SIMB[id]}"/>`); };
@@ -136,7 +136,7 @@ const Vectra = (() => {
   const placa = () => `<path class="placa" d="${F.placa}"/>` +
     ['tach', 'spd', 'tf'].map(k => `<path class="face" d="${F[k]}"/>`).join('') +
     ['meio', 'b1', 'b2', 'b3', 'velmax', 'direita'].map(k => `<path class="barra" d="${F[k]}" filter="url(#vFundoP)"/>`).join('') +
-    `<path class="barra" d="${F.lcdFora}" filter="url(#vFundoP)"/><path class="lcd" d="${F.lcd}" filter="url(#vFundoP)"/>` + lampada('seta', seta(-1) + seta(1)) +
+    `<path class="barra" d="${F.lcdFora}" filter="url(#vFundoP)"/><path class="lcd" d="${F.lcd}" filter="url(#vFundoP)"/>` + lampada('setaE', seta(-1)) + lampada('setaD', seta(1)) +
     pino(M.pinos[0], 'knob') + pino(M.pinos[1]) +
     // a sombra da borda de cima e o lábio de baixo das janelas dos mostradores vão por cima da escala: ela está no fundo do rebaixo
     marcas() + ['tach', 'spd', 'tf'].map(k => `<path class="sombra" d="${F[k]}" filter="url(#vSombra)"/>`).join('') + LUZES.map(luz).join('') + velmax() +
@@ -186,6 +186,11 @@ const Vectra = (() => {
       $('todas').before(b);
       return b;
     });
+    // pisca-alerta: as duas setas juntas
+    const alerta = document.createElement('button'); alerta.textContent = 'Pisca-alerta'; alerta.dataset.luz = 'alerta'; alerta.setAttribute('aria-pressed', false);
+    alerta.set = on => { for (const id of ['setaE', 'setaD']) document.querySelector(`[data-luz="${id}"]`).set(on); alerta.setAttribute('aria-pressed', on); };
+    alerta.onclick = () => alerta.set(alerta.getAttribute('aria-pressed') !== 'true');
+    $('todas').before(alerta);
     $('todas').onclick = () => { const on = lightBtns.some(b => b.getAttribute('aria-pressed') === 'false'); lightBtns.forEach(b => b.set(on)); };
     $('luz').onclick = () => { const on = root.classList.toggle('lit'); document.body.classList.toggle('lit', on); $('luz').setAttribute('aria-pressed', on); };
 
