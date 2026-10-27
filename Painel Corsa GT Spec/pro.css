@@ -1,0 +1,42 @@
+/* escala e números como no Corsa original (Arial itálico negrito); de noite acendem em âmbar */
+.mk text{fill:#eef1f4;font:italic 700 27px Arial,Helvetica,sans-serif;text-anchor:middle;dominant-baseline:central}
+.mk text.m{font-size:22px}.mk text.s{font-size:12px}
+.mk line{stroke:#eef1f4}
+/* cor da iluminação: âmbar (padrão), azul (?cor=azul) ou verde (?cor=verde) */
+svg{--luz:#ffc56e;--glow:#ffa63c;--lcd1:#f2c56a;--lcd2:#d9a446;--tinta:#2a1a04}
+svg.azul{--luz:#7cc4ff;--glow:#2f8fff;--lcd1:#8fd0ff;--lcd2:#4f9fe0;--tinta:#06182c}
+svg.verde{--luz:#8dff9a;--glow:#2fe060;--lcd1:#a6f0a0;--lcd2:#62c85e;--tinta:#08240a}
+.lit .mk text{fill:var(--luz)}.lit .mk line{stroke:var(--luz)}
+.lit .mk{filter:drop-shadow(0 0 3px var(--glow))}
+.mk .red{stroke:#e0352b}
+/* faixa vermelha do conta-giros: de noite acende em vermelho, número junto */
+.lit .mk .red{stroke:#ff3b30}.lit .mk text.rz{fill:#ff3b30}
+.face{fill:url(#face)}.ring{fill:none;stroke:url(#aro)}
+/* informações no estilo da FT450: rótulo laranja, valor branco grande */
+.dw{fill:#050607;stroke:#2a2e33;stroke-width:1.5}
+.dg{fill:#f4f4f0;font:700 34px Arial,Helvetica,sans-serif;text-anchor:middle;dominant-baseline:central}
+.dg.u{font-size:13px;font-weight:400;fill:#c9ccd0}
+.ft{fill:#f08a24;font:400 17px Arial,Helvetica,sans-serif;dominant-baseline:central}
+/* telinhas de LCD dos lados: fundo cinza-esverdeado, algarismos escuros; de noite a luz de fundo acende em âmbar */
+.lcdbg{fill:url(#lcd)}.lit .lcdbg{fill:url(#lcdLit)}
+.lr{fill:#2a3024;font:700 11px Arial,Helvetica,sans-serif;dominant-baseline:central}
+.lv{fill:#1a1e16;font:700 30px Arial,Helvetica,sans-serif;text-anchor:end;dominant-baseline:central}
+.lu{fill:#2a3024;font:700 12px Arial,Helvetica,sans-serif}
+.lseg{fill:#1a1e16}
+.lit .lr,.lit .lu,.lit .lv,.lit .lseg{fill:var(--tinta)}
+.needle{fill:#eeede4;stroke:#b9b6a6;stroke-width:.5;filter:drop-shadow(1.5px 3px 2px #0009)}
+/* espias como no original: acende o fundo da janela, o símbolo fica escuro por cima */
+.slot{stroke:#262b31;stroke-width:2}
+.lamp .bg{fill:transparent}
+.lamp .sym{fill:#0b0c0e;stroke:#0b0c0e;opacity:.55;stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
+.lamp.on .bg{fill:var(--c);filter:drop-shadow(0 0 5px var(--c))}
+/* luz de temperatura: pisca rápido (0,7 s por ciclo) enquanto o motor estiver quente */
+.lamp.on.pisca .bg{animation:pisca .7s steps(1) infinite}
+@keyframes pisca{50%{fill:transparent;filter:none}}
+.lamp.on .sym{opacity:.9}
+.lamp.simb .sym{fill:var(--c);stroke:var(--c);opacity:.12}
+.lamp.simb.on .sym{opacity:1;filter:drop-shadow(0 0 3px var(--c))}
+/* shift light (luz de troca de marcha): lente vermelha apagada; acende a partir de 6000 rpm */
+.lamp.shift .bg{fill:url(#shiftOff)}
+.lamp.shift.on .bg{fill:url(#shiftOn);filter:drop-shadow(0 0 4px #ff2a1a) drop-shadow(0 0 10px #ff2a1a)}
+.nf{fill:none!important}.tr{stroke:none!important}

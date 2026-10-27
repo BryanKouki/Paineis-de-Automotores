@@ -16,7 +16,7 @@
   .logo{background:#fff;height:170px;box-sizing:border-box;padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
   .logo img{max-width:86%;max-height:100%;min-height:0;object-fit:contain}
   .logo .versoes{display:flex;align-items:center;justify-content:center;gap:18px;max-width:100%}
-  .logo .versoes img{max-width:none;height:34px}
+  .logo .versoes img{max-width:none;min-width:0;height:34px}
   .info{padding:16px;display:flex;flex-direction:column;gap:10px;flex:1}
   h2{margin:0;font-size:18px}
   h2 small{font-size:12px;font-weight:400;color:#8b949e}
@@ -47,13 +47,21 @@ const PAINEIS = [
     texto: 'Mostradores brancos com hodômetro digital, 23 luzes-espia, aviso de troca de marcha e de velocidade máxima.' },
   { nome: 'Honda CG 125 Titan 2000', arquivo: 'Painel CG 125 2000', logos: ['cg'],
     texto: 'Velocímetro, espias com lente, miolo de ignição que liga o painel e a boia de combustível com mau contato.' },
+  { nome: 'Chevrolet Kadett GLS 98', arquivo: 'Painel Kadett GLS 98', logos: ['kadett'], versoes: ['gls', 'mpfi'],
+    texto: 'Painel analógico do Kadett 2.0 MPFI: hodômetro de tambores e miolo central só com a luz de bateria ou completo, com voltímetro e pressão do óleo.' },
+  { nome: 'Chevrolet Vectra B CD Challenge', arquivo: 'Painel Vectra B CD Challenge', logos: ['vectra'], versoes: ['vectra-22-16v', 'challenge'],
+    texto: 'Placa prateada do Vectra 2.2 16V: velocímetro até 260, visor de cristal líquido com parcial e total, 16 luzes-espia e iluminação âmbar.' },
+  { nome: 'Chevrolet Vectra Elite', arquivo: 'Painel Vectra Elite', logos: ['vectra-elite'], versoes: ['elite', 'flexpower'], tipos: [1, 2],
+    texto: 'Aros cromados e mostradores pretos, no estilo de tela: conta-giros, velocímetro, temperatura, combustível e visor com parcial e total; iluminação âmbar.' },
+  { nome: 'Corsa GT Spec', arquivo: 'Painel Corsa GT Spec', logos: ['corsa'], versoes: ['gt-spec'], tipos: [1, 2],
+    texto: 'Corsa preparado com turbo de 1,3 bar: coroa de LEDs no conta-giros, shift light, telinhas de LCD com pressões, temperaturas, sonda e TPS, regulagem de pressão no botão KOUKI e som do turbo.' },
 ];
 const TIPOS = [['', 'Painel original (com a carcaça)'], [' Dashboard', 'Dashboard (tela retangular)'], [' Dashboard com Multimidia', 'Dashboard com multimídia']];
 const $ = id => document.getElementById(id), img = (n, alt) => `<img src="logos/${n}.png" alt="${alt}">`;
 
 $('lista').innerHTML = PAINEIS.map((p, i) => `<section class="carro">
   <div class="logo">${p.logos.map(n => img(n, p.nome)).join('')}${p.versoes ? `<div class="versoes">${p.versoes.map(n => img(n, n)).join('')}</div>` : ''}</div>
-  <div class="info"><h2>${p.nome} <small>v${VERSOES[p.arquivo]}</small></h2><p>${p.texto}</p>${TIPOS.map(([fim, rotulo]) => `<button data-url="${p.arquivo}/${p.arquivo}${fim}.html">${rotulo}</button>`).join('')}</div>
+  <div class="info"><h2>${p.nome} <small>v${VERSOES[p.arquivo]}</small></h2><p>${p.texto}</p>${TIPOS.filter((_, k) => !p.tipos || p.tipos.includes(k)).map(([fim, rotulo]) => `<button data-url="${p.arquivo}/${p.arquivo}${fim}.html">${rotulo}</button>`).join('')}</div>
 </section>`).join('');
 
 // aberto pelo executável, o endereço traz a porta da ponte com a mídia do Windows (?ponte=...); ela é repassada aos painéis

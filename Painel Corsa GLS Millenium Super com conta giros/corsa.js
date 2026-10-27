@@ -63,7 +63,7 @@ const Corsa = (() => {
   // fendas das espias: [cx, cy, largura, altura, luzes, cor da fenda]
   // cada luz = [id, início, fim] em fração da largura da fenda, medidos na foto do painel aceso: as janelas têm um vão escuro entre elas.
   // 'simb' = quem acende é o símbolo (sem janela). Também aceita só os ids: ['a'] ou ['a', 'b'].
-  const SLOTS = [[620, 89.5, 164, 35, [['eletr', 0, .2, 'simb'], ['alto', .32, .63], ['nebl', .685, 1]], '#454c55'], [618.5, 135.5, 83, 33, [['seta', 0, 1]], '#454c55'],
+  const SLOTS = [[620, 89.5, 164, 35, [['eletr', 0, .3, 'simb'], ['alto', .32, .63], ['nebl', .685, 1]], '#454c55'], [618.5, 135.5, 83, 33, [['seta', 0, 1]], '#454c55'],
     [149, 256, 119, 35, [['freio', 0, .46], ['bat', .54, 1]]], [1071, 279, 117, 33, [['oleo', 0, .46], ['eng', .54, 1]]], [310.5, 466, 82, 29, [['inj', 0, 1]]], [902.5, 478, 78, 27, [['abs', 0, 1]]]];
   const slot = ([cx, cy, w, h, ids, off = '#1a1c20']) => {
     const x = cx - w / 2, y = cy - h / 2, m = 2.5, r = h / 2 - m, t = y + m, bt = y + h - m;
@@ -73,7 +73,8 @@ const Corsa = (() => {
       // ponta arredondada só onde a janela encosta na ponta da fenda
       const d = `M${a1},${t}H${b1}${f1 < 1 ? `V${bt}` : `A${r},${r} 0 0 1 ${b1},${bt}`}H${a1}${f0 ? '' : `A${r},${r} 0 0 1 ${a1},${t}`}Z`;
       // símbolo com cerca de 70% da altura da fenda, como na foto
-      return lamp(id, simb ? '' : `<path class="bg" d="${d}"/>`, (a + b) / 2, cy, h / 26, null, simb ? ' simb' : '');
+      // símbolo sem janela na ponta da fenda: no meio do espaço entre a borda e a janela vizinha, não na ponta redonda
+      return lamp(id, simb ? '' : `<path class="bg" d="${d}"/>`, simb && !f0 ? x + f1 * w / 2 : (a + b) / 2, cy, h / 26, null, simb ? ' simb' : '');
     }).join('');
   };
 
@@ -134,7 +135,7 @@ const Corsa = (() => {
     };
     const fuel = arc(FUEL.px, FUEL.py, 91.5, fuelAngle(0) - 6, fuelAngle(0) + 6, 23) + [10, 20, 30, 40].map(l => sTick(FUEL, fuelAngle(l), l % 20 === 0)).join('') +
       sNum(FUEL, fuelAngle(20), 20) + sNum(FUEL, fuelAngle(40), 40) + text(214, 414, 'L', 'm') +
-      `<g id="pump" transform="translate(76,414) scale(1.2)"><path class="icf" fill-rule="evenodd" d="M-7-8h10v16h-10zM-5-6v5h6v-5z"/><path class="ic" d="M3-3h2.5q2 0 2 2v6"/></g>`;
+      `<g id="pump" transform="translate(76,414)"><path class="icf" fill-rule="evenodd" d="${ICONES.bomba}"/></g>`; // bomba decalcada (icones.js), do tamanho da antiga
     const temp = [85, 90, 95, 100, 105].map(t => sTick(TEMP, tempAngle(t), t % 10 === 0)).join('') + arc(TEMP.px, TEMP.py, 99, 43, 50.5, 20) +
       sNum(TEMP, tempAngle(90), 90) + sNum(TEMP, tempAngle(100), 100) + text(1001, 435, '°C', 'm') +
       `<g transform="translate(1135,433) scale(1.2)"><path class="ic" d="M0-10v10M0-8h4M0-4h4M-10 8q2.5-3 5 0M5 8q2.5-3 5 0M-8 4h16"/><circle class="icf" cy="3" r="3"/></g>`;

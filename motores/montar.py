@@ -29,7 +29,8 @@ cands = freqs[:, None] * 120 / np.array([1, 2, 4, 8])[None, :]
 jan = np.array([np.median(forca[i:i + 8]) for i in range(len(forca))])
 firme = int(np.argmax(jan > .6))                                  # onde a subida começa a repetir bem
 # no corte o som ou perde a repetição ou passa a repetir no ritmo fixo do próprio corte: nos dois casos a subida acabou
-parada = np.array([freqs[i:i + 8].max() < 1.03 * freqs[i:i + 8].min() for i in range(len(freqs))])
+# o ritmo do corte pode alternar entre dois valores próximos (uns 6% de diferença): a tolerância cobre isso
+parada = np.array([freqs[i:i + 8].max() < 1.08 * freqs[i:i + 8].min() for i in range(len(freqs))])
 fraca = ((jan < .45) | parada) & (np.arange(len(jan)) > firme + 15)
 t_corte = tc[np.argmax(fraca)] if fraca.any() else None
 f_fim = np.median(freqs[tc > marcas['solta'] - 3])

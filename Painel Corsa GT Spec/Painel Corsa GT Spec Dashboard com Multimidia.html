@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel Corsa GT Spec Dashboard com Multimidia</title>
+<link rel="stylesheet" href="pro.css">
+<link rel="stylesheet" href="gt.css">
+</head>
+<body>
+<!-- tela retangular 1920x720 com a multimídia no meio. O painel (1280x480) é desenhado uma vez, escondido, e mostrado em pedaços com
+     <use>, recortados em volta de cada mostrador. Dirigindo pelo teclado ou controle, com turbo e som -->
+<svg id="tela" viewBox="0 0 1920 720" role="img" aria-label="Painel Corsa GT Spec Dashboard com Multimidia">
+  <defs><svg id="p" width="1280" height="480" viewBox="0 0 1280 480"></svg></defs>
+  <rect width="1920" height="720" fill="#0b0c0e"/>
+  <g id="pedacos"></g>
+  <g id="mm"></g>
+</svg>
+<div id="ctl"></div>
+<script src="../versoes.js"></script><!-- etiqueta da versão no canto; sem o arquivo, a página abre igual -->
+<script src="../controle.js"></script><!-- teclado e controle; sem o arquivo, a página abre igual -->
+<script src="som.js"></script><!-- som do motor; sem o arquivo, a página abre igual, sem som -->
+<script src="icones.js"></script>
+<script src="pro.js"></script>
+<script src="gt.js"></script>
+<script src="multimidia.js"></script>
+<script>
+// pedaços: [recorte no painel ('c', x, y, raio | 'r', x, y, largura, altura), ponto do painel, ponto na tela, escala]
+const PEDACOS = [
+  [['r', 10, 60, 184, 404], [102, 262], [102, 340], 1.15],        // telinhas da esquerda e a luz da reserva
+  [['r', 1086, 60, 184, 404], [1178, 262], [1818, 340], 1.15],    // telinhas da direita e a luz da temperatura
+  [['c', 432, 205, 190], [432, 205], [390, 255], 1.0],            // conta-giros
+  [['c', 848, 205, 190], [848, 205], [1530, 255], 1.0],           // velocímetro
+  [['c', 640, 382, 98], [640, 382], [390, 605], .95],             // turbo
+  [['r', 560, 4, 160, 270], [640, 140], [1530, 590], .55],        // espias de cima, setas, marcha e shift light
+  [['r', 360, 425, 160, 52], [440, 451], [215, 690], .8],         // óleo e injeção
+  [['r', 750, 425, 180, 52], [840, 451], [1700, 690], .8],        // freio, bateria e cinto
+];
+document.getElementById('pedacos').innerHTML = PEDACOS.map(([[t, ...v], [ax, ay], [x, y], s], i) =>
+  `<clipPath id="pc${i}">${t === 'c' ? `<circle cx="${v[0]}" cy="${v[1]}" r="${v[2]}"/>` : `<rect x="${v[0]}" y="${v[1]}" width="${v[2]}" height="${v[3]}" rx="10"/>`}</clipPath>` +
+  `<g transform="translate(${x},${y}) scale(${s}) translate(${-ax},${-ay})" clip-path="url(#pc${i})"><use href="#p"/></g>`).join('');
+Multimidia.build({ target: document.getElementById('mm'), contato: 'Colin McRae', tema: { cartao: '#1c1e22', borda: '#34373d', botao: '#2e3137', sub: '#a9adb4', rua: '#2b2e34', mapa: '#14161a', acento: '#ffc56e', capa: ['#f2c56a', '#2b2e34'] } });
+</script>
+</body>
+</html>

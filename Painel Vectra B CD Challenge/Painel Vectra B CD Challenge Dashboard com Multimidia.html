@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel Vectra B CD Challenge Dashboard com Multimidia</title>
+<link rel="stylesheet" href="vectra.css">
+</head>
+<body>
+<!-- tela retangular 1920x720: conta-giros à esquerda, multimídia no meio, velocímetro à direita; o resto da placa em pedaços embaixo -->
+<svg id="p" viewBox="0 0 1920 720" role="img" aria-label="Painel do Vectra B CD Challenge com multimídia">
+  <defs><linearGradient id="tela" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d0f12"/><stop offset="1" stop-color="#181b1f"/></linearGradient>
+    <g id="painel"></g></defs>
+  <rect width="1920" height="720" rx="26" fill="url(#tela)" stroke="#2a2f36" stroke-width="2"/>
+  <g id="pedacos"></g>
+  <g id="mm"></g>
+</svg>
+<div id="ctl"></div>
+
+<script src="../versoes.js"></script><!-- etiqueta da versão no canto; sem o arquivo, a página abre igual -->
+<script src="../controle.js"></script><!-- controle de videogame; sem o arquivo, a página abre igual -->
+<script src="som.js"></script><!-- som do motor; sem o arquivo, a página abre igual, sem som -->
+<script src="vectra-dados.js"></script>
+<script src="vectra.js"></script>
+<script src="multimidia.js"></script>
+<script>
+// a placa é desenhada uma vez (escondida, em unidades do painel) e mostrada em pedaços com <use>, que acompanham os ponteiros e as luzes
+Vectra.build({ target: document.getElementById('painel') });
+// cada pedaço é recortado pelo formato das janelas dele (sem a placa em volta): [janelas, peças soltas por cima, canto de cima à
+// esquerda na placa, canto na tela, escala]
+const C = FORMAS.caminhos;
+const PEDACOS = [
+  [['tach'], [], [-48, 34], 30, 20, 1.75],                     // conta-giros
+  [['spd'], ['i_seta'], [248, 16], 1360, 20, 1.32],                // velocímetro e setas
+  [['tf'], [], [655, 36], 30, 455, 1.1],                       // temperatura e combustível
+  [['b1'], [], [-48, 297], 330, 470, 1.2],                     // luzes da esquerda
+  [['b2'], [], [164, 295], 330, 545, 1.2],                     // luzes do meio
+  [['lcdFora'], [], [502, 239], 1360, 425, 1.5],               // visor
+  [['velmax'], [], [681, 241], 1630, 425, 1.3],                // VEL MAX e reserva
+  [['direita'], [], [682, 289], 1630, 490, 1.3],               // luzes da direita
+  [['b3'], [], [307, 294], 1630, 572, 1.3],                    // luzes de baixo
+  [['meio'], [], [179, 244], 1360, 600, 1.0],                  // barra do câmbio
+];
+// a placa desenhada fica dentro de um <g> com a posição dela: as peças soltas (as setas) usam o mesmo deslocamento
+const base = document.querySelector('#painel>g').getAttribute('transform');
+document.getElementById('pedacos').innerHTML = PEDACOS.map(([jan, soltas, [x0, y0], x, y, s], i) =>
+  `<clipPath id="pc${i}">${jan.map(k => `<path d="${C[k]}"/>`).join('')}</clipPath>` +
+  `<g transform="translate(${x},${y}) scale(${s}) translate(${-x0},${-y0})"><g clip-path="url(#pc${i})"><use href="#painel"/></g>` +
+  soltas.map(id => `<g transform="${base}"><use href="#${id}"/></g>`).join('') + '</g>').join('');
+Multimidia.build({
+  target: document.getElementById('mm'), contato: 'Ingo Hoffmann',
+  tema: { cartao: '#1d1f23', borda: '#33363c', botao: '#2f3238', sub: '#a9adb3', rua: '#2a2d32', mapa: '#141619', acento: '#ff9a2e', capa: ['#8a8d91', '#1d1f23'],
+    hora: '600 30px Bahnschrift,"Arial Narrow",Arial,sans-serif', horaCor: '#ecebe6' },
+});
+</script>
+</body>
+</html>

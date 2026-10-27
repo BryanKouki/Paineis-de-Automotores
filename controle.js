@@ -117,6 +117,8 @@ const Controle = (() => {
    * tracao ('D' dianteira ou 'T' traseira), freioDiant (fração da força de freio na dianteira) e esterco (esterço máximo das rodas, rad).
    * partida (giro a que o motor sobe ao pegar; sem ele, 25% acima da lenta) e semCorte (motor sem corte de giro).
    * chave (só nos carros) = luzes que o miolo comanda: ateLigar (acendem em II e apagam quando o motor pega) e teste (acendem 3 s)
+   * turbo (opcional) = { pressao (bar, a regulada de fábrica), inicio e cheio (giro em que começa a encher e em que chega à pressão
+   *   regulada) }. A regulagem vem do #boostReg do painel, se houver; a pressão vai para o #turbo e o acelerador, em %, para o #tps
    */
   function ligar(v) {
     const $ = id => document.getElementById(id), luz = id => document.querySelector(`[data-luz="${id}"]`);
@@ -131,6 +133,11 @@ const Controle = (() => {
     const guinada = massa * cgF * cgT;                                        // inércia de guinada, kg·m² (aproximação usual)
     const motriz = v.tracao === 'T' ? 1 : 0;                                  // eixo que traciona: 0 dianteiro, 1 traseiro
     console.assert(torque(v.rpmKgfm) === tMax && Math.abs(torque(v.rpmCv) - tPot) < 1e-9 && tPot <= tMax, 'torque');
+    // turbo: pressão relativa na admissão (bar; abaixo de zero é vácuo, com a borboleta fechada). O torque cresce com a pressão
+    // absoluta, com 10% de perda pelo ar mais quente depois de comprimido
+    const TB = v.turbo, regulada = () => +(($('boostReg') || {}).value ?? TB.pressao);
+    let pressao = 0, acelPico = 0; // acelPico: o acelerador mais fundo dos últimos instantes (cai 1 por segundo)
+    const sopro = () => TB ? 1 + .9 * Math.max(0, pressao) : 1;
 
     document.body.insertAdjacentHTML('beforeend', VISOR);
 
@@ -158,6 +165,7 @@ const Controle = (() => {
       if (audio) { audio.resume(); return; }
       audio = new AudioContext(); filtro = audio.createBiquadFilter(); geral = audio.createGain(); geral.gain.value = 0;
       filtro.connect(geral).connect(audio.destination);
+      if (TB) criaTurbo();
       lacos = som.lacos.map(([giro, b64]) => {
         const bin = atob(b64), buf = audio.createBuffer(1, bin.length / 2, som.taxa), d = buf.getChannelData(0);
         for (let i = 0; i < d.length; i++) d[i] = ((bin.charCodeAt(2 * i) | bin.charCodeAt(2 * i + 1) << 8) << 16 >> 16) / 32768;
@@ -165,6 +173,59 @@ const Controle = (() => {
         fonte.buffer = buf; fonte.loop = true; g.gain.value = 0; fonte.connect(g).connect(filtro); fonte.start();
         return { giro, fonte, g };
       });
+    };
+    // som do turbo, sintetizado: o assobio da turbina (um tom que sobe com a rotação dela, mais um chiado de ar), que só aparece com
+    // pressão, e o "psshh" da válvula de alívio ao tirar o pé com o turbo cheio (ruído num filtro agudo que desce; mais longo com mais pressão)
+    let assobio, assobio2, tomTurbo, chiado, ganhoChiado, ruido;
+    const criaTurbo = () => {
+      ruido = audio.createBuffer(1, audio.sampleRate, audio.sampleRate); const d = ruido.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      tomTurbo = audio.createGain(); tomTurbo.gain.value = 0; tomTurbo.connect(audio.destination);
+      assobio = audio.createOscillator(); assobio2 = audio.createOscillator(); assobio2.type = 'triangle';
+      const g2 = audio.createGain(); g2.gain.value = .35; assobio.connect(tomTurbo); assobio2.connect(g2).connect(tomTurbo); assobio.start(); assobio2.start();
+      const n = audio.createBufferSource(), bp = audio.createBiquadFilter(); n.buffer = ruido; n.loop = true; bp.type = 'bandpass'; bp.frequency.value = 5200; bp.Q.value = 1.4;
+      ganhoChiado = audio.createGain(); ganhoChiado.gain.value = 0; n.connect(bp).connect(ganhoChiado).connect(audio.destination); n.start(); chiado = bp;
+    };
+    const tocaTurbo = volume => {
+      if (!audio || !assobio) return;
+      const t = audio.currentTime, vai = (p, x) => p.setTargetAtTime(x, t, .05);
+      const cheio = Math.max(0, Math.min(1, (pressao + .25) / (Math.max(.4, regulada()) + .25))); // 0 sem pressão, 1 na regulada
+      const f = 1400 + 4200 * cheio + .25 * rpm;                                         // tom da turbina
+      vai(assobio.frequency, f); vai(assobio2.frequency, f * 1.5);
+      vai(tomTurbo.gain, mudo ? 0 : nivel * volume * .055 * cheio ** 2);
+      vai(ganhoChiado.gain, mudo ? 0 : nivel * volume * .09 * cheio ** 1.5); vai(chiado.frequency, 3500 + 3000 * cheio);
+    };
+    // a válvula de alívio: um espirro de ar com o piado da válvula (um assobio que desce de tom e treme, como a válvula batendo).
+    // Quanto mais pressão havia, mais alto, mais agudo e mais longo. O som se ajusta no regulador da válvula (o botão ao lado do
+    // alto-falante): volume, tom, duração e quanto de piado; o ajuste fica gravado no navegador para cada painel
+    const AJ_PADRAO = { vol: 1, tom: 1, dur: 1, piado: 1 }, AJ_CHAVE = 'alivio:' + decodeURIComponent(location.pathname.split('/').slice(-2, -1)[0] || '');
+    let aj = { ...AJ_PADRAO };
+    try { aj = { ...AJ_PADRAO, ...JSON.parse(localStorage[AJ_CHAVE] || '{}') }; } catch (e) { }
+    const alivio = (p, teste) => {
+      if (!audio || !ruido || (mudo && !teste)) return;
+      const q = Math.min(1.4, p / 1.3), dur = (.45 + .45 * Math.min(1, q)) * aj.dur, tom = aj.tom;
+      const t = audio.currentTime, pico = nivel * .5 * Math.min(1, q) * aj.vol;
+      // ar: ruído num filtro agudo que desce
+      const n = audio.createBufferSource(), bp = audio.createBiquadFilter(), hp = audio.createBiquadFilter(), g = audio.createGain();
+      n.buffer = ruido; n.loop = true;
+      bp.type = 'bandpass'; bp.Q.value = 1.6; hp.type = 'highpass'; hp.frequency.value = 1400 * tom;
+      bp.frequency.setValueAtTime((5200 + 1800 * q) * tom, t); bp.frequency.exponentialRampToValueAtTime((1900 + 600 * q) * tom, t + dur);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(pico, t + .012);
+      g.gain.setTargetAtTime(pico * .55, t + .06, dur * .3); g.gain.exponentialRampToValueAtTime(.0005, t + dur);
+      n.connect(bp).connect(hp).connect(g).connect(audio.destination); n.start(t); n.stop(t + dur + .05);
+      // piado: dois tons (o segundo uma quinta acima) que descem e tremem a uns 28 vezes por segundo, mais forte no começo
+      if (aj.piado > .01) {
+        const pg = audio.createGain(), trem = audio.createGain(), lfo = audio.createOscillator(), lg = audio.createGain();
+        const pp = pico * .45 * aj.piado, fim = t + dur * .8;
+        pg.gain.setValueAtTime(0, t); pg.gain.linearRampToValueAtTime(pp, t + .02); pg.gain.exponentialRampToValueAtTime(.0005, fim);
+        lfo.frequency.value = 28; lg.gain.value = .45; trem.gain.value = .55; lfo.connect(lg).connect(trem.gain);
+        for (const [mult, forma, ganho] of [[1, 'triangle', 1], [1.5, 'sine', .4]]) {
+          const o = audio.createOscillator(), og = audio.createGain(); o.type = forma; og.gain.value = ganho;
+          o.frequency.setValueAtTime((3000 + 1600 * q) * tom * mult, t); o.frequency.exponentialRampToValueAtTime((1500 + 500 * q) * tom * mult, fim);
+          o.connect(og).connect(trem); o.start(t); o.stop(fim + .05);
+        }
+        trem.connect(pg).connect(audio.destination); lfo.start(t); lfo.stop(fim + .05);
+      }
     };
     const tocaSom = (giro, carga, volume) => {
       if (!audio) return;
@@ -284,6 +345,30 @@ const Controle = (() => {
       $('pedal').onclick = () => { ativa(); chute = true; };
     }
 
+    // regulador do som da válvula de alívio (só nos carros com turbo): abre e fecha num botão ao lado do alto-falante
+    if (TB && som) {
+      document.head.insertAdjacentHTML('beforeend', `<style>#alivioBtn{position:absolute;right:177px;bottom:100px;width:18px;height:18px;background:none;border:0;padding:0;color:#c9ccd0;opacity:.55;cursor:pointer;line-height:0}
+#alivioBtn:hover,#alivioBtn[aria-expanded=true]{opacity:1}
+#ctl #alivioReg[hidden]{display:none}
+#ctl #alivioReg{position:absolute;right:120px;bottom:124px;z-index:4;background:#1b1f24ee;border:1px solid #3a4350;border-radius:8px;padding:10px 12px;font:12px system-ui,sans-serif;color:#dde;display:grid;grid-template-columns:auto 120px 3.4em;gap:6px 8px;align-items:center}
+#alivioReg b{grid-column:1/-1;font-weight:600}#ctl #alivioReg div{grid-column:1/-1;display:flex;gap:6px;justify-content:flex-end;margin:4px 0 0}#ctl #alivioReg label{display:block}
+#alivioReg button{font:inherit;padding:4px 8px;border-radius:6px;border:1px solid #556;background:#262b31;color:inherit;cursor:pointer}</style>`);
+      // engrenagem logo acima do regulador do turbo, no canto dos controles; a telinha abre em cima dela
+      $('ctl').insertAdjacentHTML('beforeend', '<button id="alivioBtn" aria-expanded="false" aria-label="Som da válvula de alívio" title="Som da válvula de alívio"><svg width="18" height="18" viewBox="-12 -12 24 24" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="' +
+        Array.from({ length: 8 }, (_, i) => { const a = i * Math.PI / 4, p = (r, d) => `${(r * Math.sin(a + d)).toFixed(2)},${(-r * Math.cos(a + d)).toFixed(2)}`; return `${i ? 'L' : 'M'}${p(7.6, -.2)}L${p(10.5, -.14)}L${p(10.5, .14)}L${p(7.6, .2)}`; }).join('') + 'ZM0,-3.4A3.4,3.4 0 1 0 0,3.4A3.4,3.4 0 1 0 0,-3.4Z"/></svg></button>');
+      const CAMPOS = [['vol', 'Volume', 0, 2], ['tom', 'Tom', .6, 1.6], ['dur', 'Duração', .5, 2], ['piado', 'Piado', 0, 2]];
+      $('ctl').insertAdjacentHTML('beforeend', `<div id="alivioReg" hidden><b>Válvula de alívio</b>${CAMPOS.map(([k, r, a, b]) =>
+        `<label for="aj_${k}">${r}</label><input id="aj_${k}" type="range" min="${a}" max="${b}" step=".05"><output id="ajO_${k}"></output>`).join('')}
+        <div><button id="ajTeste">Testar</button><button id="ajPadrao">Som original</button></div></div>`);
+      const poe = () => CAMPOS.forEach(([k]) => { $('aj_' + k).value = aj[k]; $('ajO_' + k).textContent = Math.round(aj[k] * 100) + '%'; });
+      const grava = () => { try { localStorage[AJ_CHAVE] = JSON.stringify(aj); } catch (e) { } };
+      poe();
+      $('alivioBtn').onclick = () => { const abre = $('alivioReg').hidden; $('alivioReg').hidden = !abre; $('alivioBtn').setAttribute('aria-expanded', abre); };
+      $('alivioReg').oninput = e => { const k = e.target.id.slice(3); if (k in aj) { aj[k] = +e.target.value; poe(); grava(); } };
+      $('ajTeste').onclick = () => { ligaSom(); setTimeout(() => alivio(Math.max(.6, regulada()), true), 60); };
+      $('ajPadrao').onclick = () => { aj = { ...AJ_PADRAO }; try { localStorage.removeItem(AJ_CHAVE); } catch (e) { } poe(); };
+    }
+
     const mostra = (id, valor, passo) => { // escreve no slider e avisa o painel, só quando o número muda
       const e = $(id); if (!e) return;
       e.step = passo;
@@ -310,7 +395,7 @@ const Controle = (() => {
       // embreagem: pisada (além da metade do curso), solta o motor das rodas. Não é preciso pisar para trocar de marcha
       const embr = le(pads, 'embr') > .5 || seguras.has(SEGURAR.embr);
       if (toques.size || seguras.size || mao || embr || acelP > .1 || freioP > .1) ativa();
-      if (!simulando) { tocaSom(0, 0, 0); return; }
+      if (!simulando) { tocaSom(0, 0, 0); tocaTurbo(0); return; }
 
       // marchas em sequência (ré, neutro, 1ª…). Como no jogo, não reduz se o giro passaria do limite nem engata a ré andando
       if (toques.has('sobe') && marcha < v.marchas.length) marcha++;
@@ -354,6 +439,7 @@ const Controle = (() => {
           if (!estadoAntes && estado) testeAte = agora + 3000;
           if (!estadoAntes && estado || !estado) for (const id of v.chave.teste) if (luz(id)) luz(id).set(!!estado);
           estadoAntes = estado;
+          $('rpm').dispatchEvent(new Event('input')); // o giro pode não mudar (ignição com o motor parado), mas o painel precisa saber (voltímetro do Kadett)
         }
         if (testeAte && agora > testeAte) { testeAte = 0; for (const id of v.chave.teste) if (luz(id)) luz(id).set(false); }
         $('tambor').style.transform = `rotate(${FASES[fase][1]}deg)`;
@@ -395,6 +481,17 @@ const Controle = (() => {
       else if (rpm >= v.rpmMax) cortando = true; else if (rpm < v.rpmMax - (marcha && !embr ? 150 : 400)) cortando = false;
       const folego = v.semCorte ? Math.max(0, Math.min(1, (v.rpmMax - rpm) / (.05 * v.rpmMax))) : 1;
       const gas = cortando || engasgo ? 0 : acel * folego;
+      if (TB) {
+        // enche com o giro (entre inicio e cheio) na proporção do acelerador; com o pé fora, vácuo. Sobe devagar (o atraso do turbo)
+        // e desce depressa
+        const enche = Math.max(0, Math.min(1, (rpm - TB.inicio) / (TB.cheio - TB.inicio)));
+        const alvo = !funciona ? 0 : acel > .05 ? -.6 * (1 - acel) + acel * regulada() * enche : -.62;
+        pressao += (alvo - pressao) * Math.min(1, dt * (alvo > pressao ? 1.4 : 5));
+        // tirou o pé com o turbo cheio (o acelerador caiu quase todo em menos de meio segundo): a válvula de alívio abre e despeja
+        // a pressão. No teclado o pedal sobe em uns 0,3 s, por isso a comparação é com o mais fundo dos últimos instantes
+        acelPico = Math.max(acel, acelPico - dt);
+        if (acelPico - acel > .45 && pressao > .3) { alivio(pressao); pressao = Math.min(pressao, -.2); acelPico = acel; }
+      }
 
       // o quadro é dividido em passos de até 4 ms: os pneus respondem depressa demais para um passo só
       const passos = Math.ceil(dt / .004) || 1, h = dt / passos;
@@ -406,9 +503,9 @@ const Controle = (() => {
         // motor parado: o giro zera (ou fica nos 230 rpm do motor de partida) e o veículo segue solto, perdendo velocidade
         if (!funciona) rpm += ((giraDesde !== null ? 230 : 0) - rpm) * Math.min(1, h * (giraDesde !== null ? 14 : 4));
         // em neutro ou com a embreagem pisada o motor gira livre: sobe pelo torque que sobra e cai pelo atrito; a marcha lenta segura o giro embaixo
-        else if (!marcha || embr) rpm = Math.min(v.rpmMax + 150, Math.max(Math.min(engasgo ? lenta * .5 : lenta, rpm + 6000 * h), rpm + (gas * torque(rpm) - atrito(rpm)) / v.inercia * 30 / Math.PI * h));
-        else if (acoplado >= lenta) { rpm = acoplado; motor = gas * torque(rpm) - (1 - gas) * atrito(rpm); travada = true; }
-        else if (gas > .05) { rpm = lenta * (1 + 1.8 * gas); motor = gas * torque(rpm); } // saída: a embreagem patina
+        else if (!marcha || embr) rpm = Math.min(v.rpmMax + 150, Math.max(Math.min(engasgo ? lenta * .5 : lenta, rpm + 6000 * h), rpm + (gas * torque(rpm) * sopro() - atrito(rpm)) / v.inercia * 30 / Math.PI * h));
+        else if (acoplado >= lenta) { rpm = acoplado; motor = gas * torque(rpm) * sopro() - (1 - gas) * atrito(rpm); travada = true; }
+        else if (gas > .05) { rpm = lenta * (1 + 1.8 * gas); motor = gas * torque(rpm) * sopro(); } // saída: a embreagem patina
         else rpm += (lenta - rpm) * Math.min(1, h * 5);                                    // devagar demais sem acelerar: embreagem aberta
 
         // pneus, um eixo por vez (modelo de bicicleta). A aceleração joga peso para trás e a freada, para a frente
@@ -454,12 +551,14 @@ const Controle = (() => {
       // consumo: proporcional à potência que o motor entrega mais a que ele gasta para girar (rendimento de 33%, gasolina);
       // engatado e com o acelerador solto a injeção corta. O seletor "Tempo" acelera o consumo junto com o hodômetro
       if (funciona && !(gas < .02 && marcha && rpm > v.lenta * 1.6))
-        litros = Math.max(0, litros - (gas * torque(rpm) + .6 * atrito(rpm)) * rpm * Math.PI / 30 / (.33 * 43e6 * .745) * dt * $('mult').value);
+        litros = Math.max(0, litros - (gas * torque(rpm) * sopro() + .6 * atrito(rpm)) * rpm * Math.PI / 30 / (.33 * 43e6 * .745) * dt * $('mult').value);
 
       // o velocímetro lê a roda dianteira (nos carros, a saída do câmbio; na moto, o cubo): patinando ou travada, é ela que ele mostra
       // som: motor funcionando no volume cheio; só o motor de partida girando, mais baixo; parado, mudo
       tocaSom(rpm, cortando || engasgo ? 0 : acel, rpm < 60 ? 0 : funciona ? 1 : .5); // sem corte, o som não cai no giro máximo
       mostra('comb', litros / porUnidade, .1); mostra('rpm', rpm, 10); mostra('vel', Math.abs(u[0]) * 3.6, .1);
+      if (TB) { tocaTurbo(funciona ? 1 : 0); const e = $('turbo'), s = pressao.toFixed(2); if (e && e.value !== s) { e.value = s; e.dispatchEvent(new Event('input')); } }
+      mostra('tps', acel * 100, 1);
       $('marcha').textContent = marcha > 0 ? marcha : marcha ? 'R' : 'N';
     })(ultimo);
   }

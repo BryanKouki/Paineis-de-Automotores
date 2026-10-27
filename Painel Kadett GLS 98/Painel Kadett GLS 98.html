@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel Kadett GLS 98</title>
+<link rel="stylesheet" href="kadett.css">
+</head>
+<body>
+<!-- coordenadas = pixels da foto de referência (1200x1038); o contorno da carcaça foi escaneado da foto -->
+<svg id="p" viewBox="40 30 1110 510" role="img" aria-label="Painel de instrumentos do Kadett GLS 98">
+  <g id="carcaca" class="housing"></g>
+  <g id="painel"></g>
+</svg>
+<div id="ctl"></div>
+
+<script src="../versoes.js"></script><!-- etiqueta da versão no canto; sem o arquivo, a página abre igual -->
+<script src="../controle.js"></script><!-- controle de videogame; sem o arquivo, a página abre igual -->
+<script src="som.js"></script><!-- som do motor; sem o arquivo, a página abre igual, sem som -->
+<script src="kadett.js"></script>
+<script>
+// contorno da carcaça (escaneado da foto, de 8 em 8 px): borda cromada por fora, painel cinza por dentro
+const FORA = [[160,86],[1040,90],[1059,96],[1073,104],[1083,112],[1092,128],[1097,152],[1099,192],[1101,224],[1105,248],[1109,280],[1113,312],[1116,336],[1120,352],[1121,368],[1123,400],[1128,416],[1132,440],[1132,464],[1128,480],[1120,496],[1113,504],[1099,512],[1050,517],[160,512],[100,507],[82,504],[70,496],[63,488],[59,480],[55,464],[55,448],[57,440],[61,424],[65,408],[73,392],[78,376],[80,352],[85,336],[90,312],[94,288],[98,264],[102,240],[106,232],[110,216],[110,184],[112,144],[115,128],[122,112],[128,104],[139,96]];
+// por dentro: o mesmo contorno, 13 px para dentro
+const cx = 596, cy = 300, DENTRO = FORA.map(([x, y]) => [x + Math.sign(cx - x) * 13 * Math.min(1, Math.abs(cx - x) / 300), y + Math.sign(cy - y) * 13 * Math.min(1, Math.abs(cy - y) / 150)]);
+const d = pts => 'M' + pts.map(p => p.join(',')).join('L') + 'Z';
+document.getElementById('carcaca').innerHTML =
+  '<defs><linearGradient id="kCromo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9ba1a6"/><stop offset=".5" stop-color="#6b7176"/><stop offset="1" stop-color="#8d9398"/></linearGradient>' +
+  '<linearGradient id="kPainel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7b8187"/><stop offset=".72" stop-color="#7f858b"/><stop offset=".74" stop-color="#868c92"/><stop offset="1" stop-color="#7c8288"/></linearGradient></defs>' +
+  // orelhas de fixação e a etiqueta bege em cima
+  '<path d="M282,86L290,66Q296,58 312,58Q328,58 334,66L342,86Z" fill="#3c4146"/><circle cx="312" cy="70" r="6" fill="#aeb2b6"/>' +
+  '<path d="M870,90L878,70Q884,62 900,62Q916,62 922,70L930,90Z" fill="#3c4146"/><circle cx="900" cy="74" r="6" fill="#aeb2b6"/>' +
+  '<rect x="530" y="48" width="157" height="40" rx="2" fill="#d9c69a" stroke="#b7a57d"/><circle cx="604" cy="62" r="7" fill="#f4f1ea" stroke="#9c8d6b"/>' +
+  `<path d="${d(FORA)}" fill="url(#kCromo)" stroke="#3a3f44"/><path d="${d(DENTRO)}" fill="url(#kPainel)"/>` +
+  // divisórias entre as três seções
+  '<path d="M481,98V440M737,98V440" stroke="#7c8287" stroke-width="3"/><path d="M478,98V440M734,98V440" stroke="#4a4f54" stroke-width="2"/>';
+Kadett.build({ target: document.getElementById('painel') });
+</script>
+</body>
+</html>

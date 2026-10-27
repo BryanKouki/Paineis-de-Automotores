@@ -1,0 +1,70 @@
+/* Estilo compartilhado pelos três painéis do Kadett GLS 98 */
+html,body{height:100%;margin:0}
+body{display:flex;flex-direction:column;background:#2b2f33;color:#dde;font:13px system-ui,sans-serif;transition:background .4s}
+body.lit{background:#050608}
+svg#p{flex:1;min-height:0;width:100%}
+#ctl{padding:10px 16px;background:#15181b}
+#ctl>div{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:center;margin:6px 0}
+#luzes{gap:6px!important}
+#ctl label{display:flex;align-items:center;gap:8px}
+#ctl .vel{display:flex;flex-direction:column;align-items:center;gap:4px}
+#ctl .vel label+label{font-size:12px;color:#aab3bd}
+#ctl input[type=range]{width:150px}
+#ctl output{min-width:4.8em;font-variant-numeric:tabular-nums}
+#ctl .soCompleta{display:none}
+#ctl.completa .soCompleta{display:flex}
+button,select{font:inherit;padding:5px 10px;border-radius:6px;border:1px solid #556;background:#262b31;color:inherit;cursor:pointer}
+button[aria-pressed=true]{background:var(--c,#ffc56e);color:#111;border-color:var(--c,#ffc56e)}
+
+/* painel verdadeiro: números e traços pequenos brancos, traços grandes coloridos, ponteiros laranja */
+svg{--marca:#f1f1ee;--ponteiro:#f0692c}
+.housing{transition:filter .4s}
+.lit .housing{filter:brightness(.35)}
+/* de noite o mostrador cinza fica escuro: só as marcas e as luzes aparecem (foto de noite) */
+.face,.quadro,.jan,.lamp .bg{transition:filter .4s}
+.lit .face,.lit .quadro,.lit .jan,.lit .lamp:not(.on) .bg{filter:brightness(.42)}
+.face{fill:url(#kFace)}
+.quadro{fill:#3d4247}
+.jan{fill:#3a3c40}
+.furo{fill:#111214}
+/* números só com o preenchimento, suavizados em tons de cinza (opacidade quase 1), sem contorno: em tamanho pequeno não borram */
+.marks{opacity:.999;transition:filter .4s}
+.marks text{text-rendering:geometricPrecision;fill:var(--marca);font:400 22px Arial,Helvetica,sans-serif;text-anchor:middle;dominant-baseline:central;transition:fill .4s}
+.marks text.s{font-size:11px;font-weight:400}
+.marks text.xs{font-size:7px;font-weight:400}
+/* traços grandes em cunha, amarelos como no verdadeiro */
+.marks .grande{fill:#eed43a}
+.marks .vermelho{fill:#e5352b;stroke:#e5352b}
+.marks .amarelo{fill:#eed43a;stroke:#eed43a}
+.marks line{stroke:var(--marca);transition:stroke .4s}
+.marks .dot{fill:var(--marca);transition:fill .4s}
+.marks .arco{fill:none;stroke:var(--marca);stroke-width:3.5;transition:stroke .4s}
+.marks .ic{fill:none;stroke:var(--marca);stroke-width:1.6;stroke-linejoin:round;transition:stroke .4s}
+.marks .icf{fill:var(--marca);stroke:none;transition:fill .4s}
+.marks .frio{fill:#3f97d6}
+/* iluminação: escala e ponteiros acendem em âmbar, como na foto de noite */
+svg.lit{--marca:#ffb84a}
+.lit .marks{filter:drop-shadow(0 0 3px #ff9d2e)}
+.lit .needle{fill:#ff7a2e;filter:drop-shadow(0 0 4px #ff6a1e)}
+/* reserva: a bomba acende em vermelho */
+.marks .low .icf{fill:#ff3b30!important}
+.marks .low .ic{stroke:#ff3b30!important}
+.marks .low{filter:drop-shadow(0 0 4px #ff3b30)}
+.needle{fill:var(--ponteiro);stroke:#0006;stroke-width:.4;transition:transform .25s ease-out,fill .4s;filter:drop-shadow(1.5px 2.5px 1.5px #0009)}
+.cubo{fill:url(#kCubo)}
+.drum{opacity:.999}
+.drum .dwin{fill:#0b0c0d}
+.drum text{fill:#ecebe6;font:15px Arial,Helvetica,sans-serif;text-anchor:middle}
+.drum .tenth rect{fill:#d8d6cf}
+.drum .tenth text{fill:#151617}
+/* luzes-espia: quem acende é o fundo da janela; o símbolo fica escuro por cima */
+.lamp .bg{fill:#3a3c40}
+#i_bat:not(.on) .bg{fill:#552c2f} /* a luz de carga apagada aparece vermelho-escura */
+.lamp .sym{fill:#0b0c0e;stroke:#0b0c0e;opacity:0;stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
+.lamp.on .bg{fill:var(--c);filter:drop-shadow(0 0 6px var(--c))}
+.lamp.on .sym{opacity:.9}
+.lamp.on.blink .bg{animation:bl .7s steps(1) infinite}
+@keyframes bl{50%{fill:#3a3c40;filter:none}}
+.nf{fill:none!important}
+.tr{stroke:none!important}
+#knob{cursor:pointer}

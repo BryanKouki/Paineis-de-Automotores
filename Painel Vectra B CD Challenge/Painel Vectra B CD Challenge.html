@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel Vectra B CD Challenge</title>
+<link rel="stylesheet" href="vectra.css">
+<style>
+  body{background:#2b2f33}
+  /* a placa é a face inteira, até a lente: o retângulo dela some e a face maior aparece por trás */
+  .placa{fill:none;stroke:none}
+  .face2{fill:url(#vPlaca)}
+  .lit .face2{filter:brightness(.3)}
+  .recesso{fill:#151618}
+  .vedacao{fill:none;stroke:#141517;stroke-linecap:round}
+  .lente{fill:none;stroke:#1e2125;stroke-linejoin:round}
+  .brilho{fill:none;stroke:#eef2f5;stroke-opacity:.45;stroke-linejoin:round}
+  .aba{fill:url(#vAba);stroke:#6f7478;stroke-width:1}
+</style>
+</head>
+<body>
+<!-- o painel inteiro como sai do carro (referência 27): a placa vai até a borda da lente transparente, com a vedação preta de borracha
+     em cima, o rebaixo escuro no meio de baixo e as abas de metal de fixação. Medidas tiradas da foto pelos três cubos (a foto corta a
+     ponta direita: a direita é a esquerda espelhada no meio da placa) -->
+<svg id="p" viewBox="-235 -75 1350 580" role="img" aria-label="Painel de instrumentos do Vectra B CD Challenge">
+  <defs>
+    <linearGradient id="vAba" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9dcde"/><stop offset="1" stop-color="#9da1a5"/></linearGradient>
+  </defs>
+  <g id="carcaca"></g>
+  <g id="painel"></g>
+  <g id="frente"></g>
+</svg>
+<div id="ctl"></div>
+
+<script src="../versoes.js"></script><!-- etiqueta da versão no canto; sem o arquivo, a página abre igual -->
+<script src="../controle.js"></script><!-- controle de videogame; sem o arquivo, a página abre igual -->
+<script src="som.js"></script><!-- som do motor; sem o arquivo, a página abre igual, sem som -->
+<script src="vectra-dados.js"></script>
+<script src="vectra.js"></script>
+<script>
+Vectra.build({ target: document.getElementById('painel') });
+// contorno da lente em unidades do painel: lado esquerdo medido na foto, o direito espelhado no meio da placa (x = 437,8)
+const E = [[-190, 95], [-201, 174], [-191, 307], [-172, 364], [-134, 406], [-100, 430]];
+const M = x => 875.6 - x, f = v => v.toFixed(1);
+const lado = pts => pts.map(([x, y]) => `L${f(x)},${y}`).join('');
+// topo em arco raso (passa a 12 acima da placa no meio); embaixo, entre x 180 e 702, o rebaixo sobe em arco até y 388
+const TOPO = `M${E[0][0]},${E[0][1]}Q437.8,-119 ${f(M(E[0][0]))},${E[0][1]}`;
+const LENTE = TOPO + lado(E.slice(1).map(([x, y]) => [M(x), y])) + 'L702,430Q437.8,346 179.5,430' + lado([...E].reverse()) + 'Z';
+const RECESSO = 'M179.5,430Q437.8,346 702,430L690,458Q437.8,384 192,458Z';
+// abas de metal (foto): duas embaixo, na base, e o parafuso de cada ponta; e os pinos de contato embaixo da lente
+const ABAS = [[226, 436, 36, 48], [610, 436, 36, 48], [-226, 118, 30, 34], [1072, 118, 30, 34]];
+const PINOS = [-60, -30, 870, 900];
+document.getElementById('carcaca').innerHTML =
+  ABAS.map(([x, y, w, h]) => `<rect class="aba" x="${x}" y="${y}" width="${w}" height="${h}" rx="3"/><circle cx="${x + w / 2}" cy="${y + h * .62}" r="6" fill="#3a3d40"/>`).join('') +
+  PINOS.map(x => `<rect class="aba" x="${x}" y="430" width="9" height="20"/>`).join('') +
+  `<path class="face2" d="${LENTE}"/><path class="recesso" d="${RECESSO}"/>`;
+// por cima de tudo: borda da lente (escura, com o reflexo claro por dentro) e a vedação de borracha preta no topo
+document.getElementById('frente').innerHTML = `<path class="lente" d="${LENTE}" stroke-width="7"/><path class="brilho" d="${LENTE}" stroke-width="2" transform="translate(0,2)"/>` +
+  `<path class="vedacao" d="${TOPO}" stroke-width="26"/>`;
+</script>
+</body>
+</html>

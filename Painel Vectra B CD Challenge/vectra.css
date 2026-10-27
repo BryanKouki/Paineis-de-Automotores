@@ -1,0 +1,63 @@
+/* Estilo compartilhado pelas páginas do Vectra B CD Challenge */
+html,body{height:100%;margin:0}
+body{display:flex;flex-direction:column;background:#2b2f33;color:#dde;font:13px system-ui,sans-serif;transition:background .4s}
+body.lit{background:#050608}
+svg#p{flex:1;min-height:0;width:100%}
+#ctl{padding:10px 16px;background:#15181b}
+#ctl>div{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:center;margin:6px 0}
+#luzes{gap:6px!important}
+#ctl label{display:flex;align-items:center;gap:8px}
+#ctl .vel{display:flex;flex-direction:column;align-items:center;gap:4px}
+#ctl .vel label+label{font-size:12px;color:#aab3bd}
+#ctl input[type=range]{width:150px}
+#ctl output{min-width:4.8em;font-variant-numeric:tabular-nums}
+button,select{font:inherit;padding:5px 10px;border-radius:6px;border:1px solid #556;background:#262b31;color:inherit;cursor:pointer}
+button[aria-pressed=true]{background:var(--c,#ffc56e);color:#111;border-color:var(--c,#ffc56e)}
+
+/* de dia: marcas brancas; acesas (noite): amarelo-claro, como nas fotos. Números em Arial negrito itálico, como na arte do mostrador */
+svg{--marca:#f2f2ef}
+svg.lit{--marca:#ffd47a}
+/* placa prateada; janelas e barras rebaixadas (a sombra e o lábio vêm do filtro). De noite a placa fica no escuro (fotos de noite) */
+.placa{fill:url(#vPlaca);stroke:#55585c;stroke-width:1.2;transition:filter .4s}
+.lit .placa{filter:brightness(.3)}
+.face{fill:url(#vFace)}
+.sombra{fill:#000;pointer-events:none;transition:opacity .4s}
+.lit .sombra{opacity:.4}
+.barra{fill:#2c2e31}
+.pinoBase{fill:url(#vPinoBase);stroke:#606367;transition:filter .4s}
+.pinoAnel{fill:none;stroke:#7d8084;opacity:.8}
+.lit .pinoBase,.lit .pinoAnel{filter:brightness(.3)}
+.lit .face,.lit .barra{fill:#1b1c1e}
+.marks{opacity:.999;transition:filter .4s}
+.marks text{text-rendering:geometricPrecision;fill:var(--marca);font:italic 700 18.5px Arial,Helvetica,sans-serif;text-anchor:middle;dominant-baseline:central;transition:fill .4s}
+.marks text.p{font-size:10.5px}
+.marks text.u{font-size:12px;font-weight:400;font-style:normal}
+.marks text.sete{font-size:95px} /* da cor dos outros números, como nas fotos e na arte original */
+.marks line{stroke:var(--marca);stroke-linecap:butt;transition:stroke .4s}
+.marks .bloco{fill:var(--marca);transition:fill .4s}
+.marks .vermf{fill:#e8322a}
+.marks .azulf{fill:#2fb6e0}
+.lit .marks{filter:drop-shadow(0 0 2px #ffb347)}
+.needle{fill:#fbfcf8;filter:drop-shadow(.6px 1.2px .8px #0008);transition:fill .4s}
+.lit .needle{fill:#fff3e2}
+.contrapeso{fill:#141517;filter:drop-shadow(.6px 1.2px .8px #0008)}
+.cubo{fill:url(#vCubo);stroke:#17181a}
+#nRpm,#nVel,#nTemp,#nComb{transition:transform .25s ease-out}
+/* luzes: só o símbolo acende, na cor dele; apagado não aparece (foto de dia) */
+.luz .simb,.luz .vt{fill:var(--c);opacity:0}
+.luz .vt{font:700 9.5px Arial,Helvetica,sans-serif;text-anchor:middle;dominant-baseline:central}
+.luz.on .simb,.luz.on .vt{opacity:1;filter:drop-shadow(0 0 2.5px var(--c))}
+.luz.on.blink .simb,.luz.on.blink .seta{animation:bl .7s steps(1) infinite}
+@keyframes bl{50%{fill:#2c2e31;filter:none}}
+/* setas: rebaixos pretos na placa; acesas, verdes */
+.seta{fill:#2c2e31;filter:url(#vFundoP)}
+.luz.on .seta{fill:var(--c);filter:drop-shadow(0 0 4px var(--c))}
+/* visor de cristal líquido: segmentos âmbar; os apagados quase não aparecem */
+.lcd{fill:#8d8c7d;transition:fill .4s}
+.lit .lcd{fill:#2a1a08}
+.seg{fill:#e8902a}
+.seg.off{fill:#000;opacity:.06}
+.lit .seg{fill:#ffb347}
+.km{font:italic 700 11px Arial,Helvetica,sans-serif;fill:#e8902a}
+.lit .km{fill:#ffb347}
+#knob{cursor:pointer}

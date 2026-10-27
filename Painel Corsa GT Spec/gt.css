@@ -1,0 +1,21 @@
+/* Corsa GT Spec: página e controles (como nos outros painéis) e o botão de regulagem do turbo KOUKI */
+html,body{height:100%;margin:0}
+body{display:flex;flex-direction:column;background:#000;color:#dde;font:13px system-ui,sans-serif}
+svg#p,svg#tela{flex:1;min-height:0;width:100%;display:block}
+#ctl{position:relative;min-height:126px;box-sizing:border-box;padding:10px 140px 10px 16px;background:#15181b}
+#ctl>div{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:center;margin:6px 0}
+#luzes{gap:6px!important}
+#ctl label{display:flex;align-items:center;gap:8px}
+#ctl input[type=range]{width:130px}
+#ctl output{min-width:4.8em;font-variant-numeric:tabular-nums}
+button,select{font:inherit;padding:5px 10px;border-radius:6px;border:1px solid #556;background:#262b31;color:inherit;cursor:pointer}
+button[aria-pressed=true]{background:#ffc56e;color:#111;border-color:#ffc56e}
+#turbo{pointer-events:none}
+/* regulador KOUKI: no canto dos controles, à esquerda do miolo da ignição */
+#kouki{position:absolute;right:144px;bottom:14px;width:84px;height:84px;cursor:grab;touch-action:none;user-select:none}
+#kouki:focus-visible{outline:2px solid #4a7fb5;outline-offset:2px;border-radius:50%}
+#kouki .kT{font:700 11px Arial,Helvetica,sans-serif;fill:#4a4e53;letter-spacing:2.5px}
+#kouki .kS{font:700 13px Arial,Helvetica,sans-serif;fill:#4a4e53;text-anchor:middle;dominant-baseline:central}
+#kouki .kM{font:italic 900 12px Arial,Helvetica,sans-serif;fill:#4a4e53;text-anchor:middle;letter-spacing:.5px}
+/* pressão regulada: embaixo do regulador, fora dele */
+#kV{position:absolute;right:144px;bottom:0;width:84px;text-align:center;font:600 11px system-ui,sans-serif;color:#c9ccd0;min-width:0}

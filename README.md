@@ -10,6 +10,10 @@ Não usa nenhuma biblioteca: é só HTML, CSS e JavaScript, e roda direto do arq
 | --- | --- |
 | **Chevrolet Corsa** (painel azul com conta-giros, versões GLS, Milenium e Super) | Conta-giros, velocímetro, combustível e temperatura; hodômetro total e parcial de tambores (os números rolam para baixo); pino de zerar o parcial; 12 luzes-espia em que o fundo da janela é que acende; iluminação âmbar; a bomba acende em vermelho na reserva. |
 | **Chevrolet Astra 2011** (mostradores brancos) | Conta-giros 0–70 (x100) e velocímetro 0–220 com a escala não linear do original; hodômetro digital (parcial e total); 23 luzes-espia; luz de troca de marcha automática; aviso de velocidade máxima programável; luz da reserva; iluminação laranja. |
+| **Chevrolet Kadett GLS 98** (2.0 MPFI) | Velocímetro 20–220 e conta-giros 0–70 (x100) com a faixa vermelha antes do 70, hachurada no começo; temperatura e combustível no miolo central; hodômetro total e parcial de tambores com botão de zerar; 7 luzes-espia em que o fundo da janela é que acende; iluminação âmbar. O miolo central de cima tem duas versões, à escolha nos controles: só a luz de bateria, ou completo, com voltímetro e pressão do óleo, que acompanham o motor quando se dirige. |
+| **Chevrolet Vectra B CD Challenge** (2.2 16V) | Placa prateada com conta-giros 0–7 (x1000), velocímetro 0–260 com coroa de blocos e temperatura e combustível na mesma janela; visor de cristal líquido com parcial e total e o pino de zerar; 16 luzes-espia, VEL MAX e a luz da reserva; setas sobre o velocímetro; iluminação âmbar. |
+| **Chevrolet Vectra Elite** (2.4 16V) | Aros cromados e mostradores pretos em tela: conta-giros, velocímetro, temperatura e combustível; visor com parcial e total; 10 luzes-espia; iluminação âmbar. Ainda sem a versão com a carcaça. |
+| **Corsa GT Spec** (com turbo) | Corsa preparado: turbo de 1,3 bar regulável no botão KOUKI, coroa de LEDs no conta-giros, shift light a 6.000 rpm, marcha e telinhas de LCD com pressões, temperaturas, sonda, TPS, bateria e avanço; luzes de reserva e de temperatura alta (piscando); som do motor com o assobio do turbo e a válvula de alívio. Sem a versão com a carcaça. |
 | **Honda CG 125 Titan 2000** | Velocímetro 0–140 com a faixa vermelha em blocos e hodômetro de tambores; lentes NEUTRAL, TURN e HI-BEAM com trama de vidro; miolo de ignição que liga o painel e acende o neutro; partida elétrica e pedal de partida; marcador de combustível; opção "mau contato na boia", em que o ponteiro balança quando a velocidade muda de repente. |
 
 Cada painel tem três versões:
@@ -74,7 +78,7 @@ As marchas são em sequência: ré, neutro, 1ª e assim por diante. Como no jogo
 
 Dirigindo, o combustível é gasto de verdade: o tanque desce conforme o esforço do motor. Com o tanque praticamente vazio o motor engasga por alguns segundos e morre; o giro zera e o veículo vai perdendo velocidade. Para abastecer, mexa no slider de combustível; depois de uma pane seca é preciso dar a partida de novo. Os painéis abrem com o tanque em zero, então abasteça antes de sair.
 
-Potência, torque, peso, pneus, aerodinâmica e entre-eixos vêm das fichas técnicas (Corsa 1.6 8V, Astra 2.0 8V e CG 125 Titan 2000; o entre-eixos da CG é aproximado). A marcha lenta dos carros fica em 900 rpm. As relações de câmbio e de diferencial são as que se costuma citar para esses modelos; não foram conferidas em manual. Distribuição de peso, altura do centro de gravidade, divisão dos freios e os dados dos pneus são valores típicos, não medidos nesses veículos. A moto usa o mesmo modelo de dois eixos dos carros: ela não inclina nem cai.
+Potência, torque, peso, pneus, aerodinâmica e entre-eixos vêm das fichas técnicas (Corsa 1.6 8V, Astra 2.0 8V, Kadett 2.0 MPFI, Vectra 2.2 16V e CG 125 Titan 2000; o entre-eixos da CG é aproximado). A marcha lenta dos carros fica em 900 rpm. As relações de câmbio e de diferencial são as que se costuma citar para esses modelos; não foram conferidas em manual. Distribuição de peso, altura do centro de gravidade, divisão dos freios e os dados dos pneus são valores típicos, não medidos nesses veículos. A moto usa o mesmo modelo de dois eixos dos carros: ela não inclina nem cai.
 
 ## Som do motor
 
@@ -107,7 +111,7 @@ logos/                       emblemas usados no seletor
 Painel .../                  uma pasta por painel: o .js e o .css dele e as três páginas
 ```
 
-Em cada pasta de painel, `som.js` é o som do motor daquele veículo, e `icones.js` (símbolos das luzes-espia) e `multimidia.js` (tocador e cartões) são cópias do mesmo arquivo, para a pasta funcionar sozinha.
+Em cada pasta de painel, `som.js` é o som do motor daquele veículo, e `icones.js` (símbolos das luzes-espia) e `multimidia.js` (tocador e cartões) são cópias do mesmo arquivo, para a pasta funcionar sozinha. O Kadett não usa o `icones.js`: os símbolos dele, decalcados de uma tabela de símbolos igual à do painel, ficam no próprio `kadett.js`.
 
 Para um painel novo aparecer no seletor, crie a pasta dele com as três páginas e acrescente uma linha na lista `PAINEIS` do `index.html`.
 
@@ -126,6 +130,7 @@ launcher\compilar.cmd
 ## Limitações
 
 - Os símbolos das luzes e alguns detalhes são desenhos simplificados, não a arte original.
+- O voltímetro e a pressão do óleo do Kadett foram refeitos de uma foto pequena: a disposição segue a foto, mas os valores das escalas são aproximados.
 - As páginas foram testadas em navegador (Chrome/Edge), não em uma tela de painel digital de verdade.
 - A resolução 1920×720 das versões Dashboard é uma escolha; o SVG se ajusta a outros tamanhos de tela.
 - A ponte com a música do computador só existe no Windows 10 (1809 ou mais novo) e 11.

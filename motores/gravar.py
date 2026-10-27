@@ -57,8 +57,10 @@ else:
 blocos, gravando = [], True
 def grava():
     mic = sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True)
-    with mic.recorder(samplerate=TAXA, channels=1) as r:
-        while gravando: blocos.append(r.record(numframes=TAXA // 10))
+    # buffer de 1/4 s: com o buffer padrão, o Engine Simulator ocupando o processador fazia a captura perder pedaços
+    # ("data discontinuity"), e o laço montado saía com buracos
+    with mic.recorder(samplerate=TAXA, channels=1, blocksize=TAXA // 4) as r:
+        while gravando: blocos.append(r.record(numframes=TAXA // 4))
 t = threading.Thread(target=grava); t.start()
 marcas = {}
 t0 = time.time()

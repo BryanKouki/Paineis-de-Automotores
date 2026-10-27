@@ -1,0 +1,30 @@
+  /* de dia (foto 01): números, traços e impressos (x100 rpm, km/h, km, 70, gravata, termômetro, bomba) brancos. De noite (fotos 02 e
+     03): arco e traços continuam brancos, números e impressos acendem em âmbar, o mostrador e a carcaça ficam no escuro */
+  svg{--num:#f2f2ef;--imp:#f2f2ef}
+  svg.lit{--num:#f7c162;--imp:#f7b54e}
+  .marca{fill:#f2f2ef}
+  .lit .marca{fill:#eef4f6}
+  .faixa{fill:#585c61}
+  .lit .faixa{fill:#3f4246}
+  .verm{fill:#e3342b}
+  .lit .verm{fill:#ff3a2e}
+  .laranja{fill:var(--imp)}
+  .gravata{fill:none;stroke:var(--imp)}
+  /* opacidade quase 1: o navegador suaviza os números em tons de cinza, sem as franjas coloridas do ClearType */
+  .marcas{opacity:.999}
+  #p text{font:italic 700 10px Arial,Helvetica,sans-serif;text-rendering:geometricPrecision}
+  .num{fill:var(--num);text-anchor:middle;dominant-baseline:central}
+  .num.laranja{fill:var(--imp)}
+  .txt{text-anchor:middle}
+  .jan{fill:#2a2c2f}
+  .lit .jan{fill:#18191b}
+  .lcd{fill:#111214}
+  .lit .marcas{filter:drop-shadow(0 0 1.1px rgba(255,196,110,.6))}
+  .lit .cromo{filter:brightness(.42)}
+  .lit .faceC{filter:brightness(.55)}
+  /* luzes: só o símbolo acende, na cor dele; apagado não aparece (foto 01) */
+  .luz path{fill:var(--c);opacity:0}
+  .luz.on path{opacity:1;filter:drop-shadow(0 0 1.6px var(--c))}
+  /* ponteiros vermelhos (fotos 01 e 02), mais vivos de noite; cubo escuro por cima */
+  .agulha{fill:#d9412f;filter:drop-shadow(.5px 1px .8px #000a)}
+  .lit .agulha{fill:#ff2f2a;filter:drop-shadow(0 0 1.6px #ff3b30)}

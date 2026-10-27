@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel Kadett GLS 98 Dashboard com Multimidia</title>
+<link rel="stylesheet" href="kadett.css">
+</head>
+<body>
+<!-- tela retangular 1920x720: velocímetro à esquerda, multimídia no meio, conta-giros à direita; o miolo central vai para os cantos de baixo -->
+<svg id="p" viewBox="0 0 1920 720" role="img" aria-label="Painel do Kadett GLS 98 com multimídia">
+  <defs><linearGradient id="tela" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d0f12"/><stop offset="1" stop-color="#181b1f"/></linearGradient></defs>
+  <rect width="1920" height="720" rx="26" fill="url(#tela)" stroke="#2a2f36" stroke-width="2"/>
+  <g id="painel"></g>
+  <g id="mm"></g>
+</svg>
+<div id="ctl"></div>
+
+<script src="../versoes.js"></script><!-- etiqueta da versão no canto; sem o arquivo, a página abre igual -->
+<script src="../controle.js"></script><!-- controle de videogame; sem o arquivo, a página abre igual -->
+<script src="som.js"></script><!-- som do motor; sem o arquivo, a página abre igual, sem som -->
+<script src="kadett.js"></script>
+<script src="multimidia.js"></script>
+<script>
+// cada peça no seu canto: [x, y, escala]
+Kadett.build({
+  target: document.getElementById('painel'),
+  place: { spd: [292, 292, 1.55], tach: [1628, 292, 1.55], faixaE: [300, 520, 1.25], faixaD: [1620, 520, 1.25], topo: [190, 628, .9], baixo: [1730, 628, .9] },
+});
+Multimidia.build({
+  target: document.getElementById('mm'), contato: 'Peter Oberndorfer',
+  tema: { cartao: '#1d1f23', borda: '#2e3238', botao: '#30343a', sub: '#a9adb3', rua: '#2a2d32', mapa: '#141619', acento: '#e3b12b', capa: ['#7a6a3a', '#1d1f23'],
+    hora: '600 30px Bahnschrift,"Arial Narrow",Arial,sans-serif', horaCor: '#ecebe6' },
+});
+</script>
+</body>
+</html>

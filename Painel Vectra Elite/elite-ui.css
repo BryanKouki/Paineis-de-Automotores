@@ -1,0 +1,12 @@
+/* Vectra Elite: página e controles, como nos outros painéis */
+html,body{height:100%;margin:0}
+body{display:flex;flex-direction:column;background:#000;color:#dde;font:13px system-ui,sans-serif}
+svg#p,svg#tela{flex:1;min-height:0;width:100%;display:block}
+#ctl{position:relative;padding:10px 140px 10px 16px;background:#15181b}
+#ctl>div{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:center;margin:6px 0}
+#luzes{gap:6px!important}
+#ctl label{display:flex;align-items:center;gap:8px}
+#ctl input[type=range]{width:130px}
+#ctl output{min-width:4.8em;font-variant-numeric:tabular-nums}
+button,select{font:inherit;padding:5px 10px;border-radius:6px;border:1px solid #556;background:#262b31;color:inherit;cursor:pointer}
+button[aria-pressed=true]{background:#ffc56e;color:#111;border-color:#ffc56e}

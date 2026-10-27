@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel Vectra Elite Dashboard com Multimidia</title>
+<link rel="stylesheet" href="elite.css">
+<link rel="stylesheet" href="elite-ui.css">
+</head>
+<body>
+<!-- tela retangular 1920x720 com a multimídia no meio. O painel (1280x480) é desenhado uma vez, escondido, e mostrado em pedaços com
+     <use>, recortados em volta de cada mostrador. Dirigindo pelo teclado ou controle -->
+<svg id="tela" viewBox="0 0 1920 720" role="img" aria-label="Painel Vectra Elite Dashboard com Multimidia">
+  <defs><svg id="p" width="1280" height="480" viewBox="0 0 1280 480"></svg></defs>
+  <rect width="1920" height="720" fill="#0b0c0e"/>
+  <g id="pedacos"></g>
+  <g id="mm"></g>
+</svg>
+<div id="ctl"></div>
+<script src="../versoes.js"></script><!-- etiqueta da versão no canto; sem o arquivo, a página abre igual -->
+<script src="../controle.js"></script><!-- teclado e controle; sem o arquivo, a página abre igual -->
+<script src="som.js"></script><!-- som do motor; sem o arquivo, a página abre igual, sem som -->
+<script src="elite-dados.js"></script>
+<script src="elite-luzes.js"></script>
+<script src="elite.js"></script>
+<script src="elite-ui.js"></script>
+<script src="multimidia.js"></script>
+<script>
+// pedaços: [recorte no painel ('c', x, y, raio | 'r', x, y, largura, altura), ponto do painel, ponto na tela, escala]
+const PEDACOS = [
+  [['c', 424.9, 218.3, 200], [424.9, 218.3], [282, 262], 1.2],   // conta-giros
+  [['c', 855.2, 218.3, 200], [855.2, 218.3], [1638, 262], 1.2],  // velocímetro
+  [['c', 129.5, 318, 104], [129.5, 318], [180, 604], .95],       // temperatura (o aro, acima do eixo do ponteiro)
+  [['c', 1150.5, 318, 104], [1150.5, 318], [1740, 604], .95],     // combustível
+];
+document.getElementById('pedacos').innerHTML = PEDACOS.map(([[t, ...v], [ax, ay], [x, y], s], i) =>
+  `<clipPath id="pc${i}">${t === 'c' ? `<circle cx="${v[0]}" cy="${v[1]}" r="${v[2]}"/>` : `<rect x="${v[0]}" y="${v[1]}" width="${v[2]}" height="${v[3]}" rx="10"/>`}</clipPath>` +
+  `<g transform="translate(${x},${y}) scale(${s}) translate(${-ax},${-ay})" clip-path="url(#pc${i})"><use href="#p"/></g>`).join('');
+Multimidia.build({ target: document.getElementById('mm'), contato: 'Rubens Barrichello', tema: { cartao: '#1c1e22', borda: '#34373d', botao: '#2e3137', sub: '#a9adb4', rua: '#2b2e34', mapa: '#14161a', acento: '#f7b54e', capa: ['#c9cdd1', '#2b2e34'] } });
+</script>
+</body>
+</html>
