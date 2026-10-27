@@ -38,7 +38,7 @@ const Astra = (() => {
     neblina: ['Farol de neblina', G, `<g transform="scale(-1,1)">${T('neblina')}</g>`],
     alto: ['Farol alto', '#3aa0ff', '<path class="nf" d="M3-8.5a9 9 0 0 1 0 17z"/><path class="nf" d="M-2-8h-10M-2-4h-10M-2 0h-10M-2 4h-10M-2 8h-10"/>'],
     nebltras: ['Neblina traseira', A, T('neblina')],
-    seta: ['Setas', G, '<path d="M-27,0l9-9v5h9v8h-9v5zM27,0l-9-9v5h-9v8h9v5z"/>'],
+    setaE: ['Seta esquerda', G, '<path d="M-27,0l9-9v5h9v8h-9v5z"/>'], setaD: ['Seta direita', G, '<path d="M27,0l-9-9v5h-9v8h9v5z"/>'],
     tc: ['Controle de tração', A, '<path class="nf" d="M-8-10q-6 7-3 17h22q3-10-3-17M-9 7.5v2.5M-4.5 7.5v2.5M0 7.5v2.5M4.5 7.5v2.5M9 7.5v2.5"/><text y="-1.5" style="font-size:9px">TC</text>'],
     cruise: ['Piloto automático', G, '<path class="nf" d="M-8.5 8a10.5 10.5 0 1 1 17 0M0 2l-5.5-6.5"/><circle cy="2" r="2.2"/><path d="M-13.5-13l6.5 1.5-4.5 4.5z"/>'],
     cambio: ['Falha no câmbio', A, GEAR + '<text style="font-size:11px">!</text>'],
@@ -60,11 +60,11 @@ const Astra = (() => {
     catalisador: ['Catalisador', A, '<path class="nf" d="M-8 0h16v8.5h-16zM-8 4.2h-5M8 4.2h5M-5-3q-2.2-2 0-4t0-4M0-3q-2.2-2 0-4t0-4M5-3q-2.2-2 0-4t0-4"/>'],
   };
   const lamp = ([id, x, y, k]) =>
-    `<g id="i_${id}" class="lamp${id === 'seta' ? ' blink' : ''}" style="--c:${LAMPS[id][1]}"><g class="sym" transform="translate(${x},${y}) scale(${k})">${LAMPS[id][2]}</g></g>`;
+    `<g id="i_${id}" class="lamp${id.startsWith('seta') ? ' blink' : ''}" style="--c:${LAMPS[id][1]}"><g class="sym" transform="translate(${x},${y}) scale(${k})">${LAMPS[id][2]}</g></g>`;
   const pill = (w, h) => `<rect class="jan" x="${-w / 2}" y="${-h / 2}" width="${w}" height="${h}" rx="8"/>`;
   // janelas das espias na moldura: forma + [luz, x, y, escala], nas posições do acetato
   const JANELAS = {
-    topo: ['<path class="jan" d="M-57.3,-31.3H57.3V0L28,31.3H-28L-57.3,0Z"/>', [['neblina', -38, -15.7, .68], ['alto', 0, -15.7, .8], ['nebltras', 38, -15.7, .68], ['seta', 0, 16.5, .78]]],
+    topo: ['<path class="jan" d="M-57.3,-31.3H57.3V0L28,31.3H-28L-57.3,0Z"/>', [['neblina', -38, -15.7, .68], ['alto', 0, -15.7, .8], ['nebltras', 38, -15.7, .68], ['setaE', 0, 16.5, .78], ['setaD', 0, 16.5, .78]]],
     esq: [pill(83.2, 35.7), [['tc', -21, .5, .78], ['cruise', 22.7, 1.5, .78]]],
     dir: [pill(83.2, 35.7), [['cambio', -21.4, 0, .8], ['sport', 21.4, 0, .8]]],
     baixoEsq: [pill(191, 35.4), [['airbag', -77.5, 0, .82], ['cinto', -39.6, 0, .78], ['arref', -.8, 0, .74], ['freio', 37.9, 0, .78]]],
@@ -185,6 +185,11 @@ const Astra = (() => {
       $('todas').before(b);
       return b;
     });
+    // pisca-alerta: as duas setas juntas
+    const alerta = document.createElement('button'); alerta.textContent = 'Pisca-alerta'; alerta.dataset.luz = 'alerta'; alerta.setAttribute('aria-pressed', false);
+    alerta.set = on => { for (const id of ['setaE', 'setaD']) document.querySelector(`[data-luz="${id}"]`).set(on); alerta.setAttribute('aria-pressed', on); };
+    alerta.onclick = () => alerta.set(alerta.getAttribute('aria-pressed') !== 'true');
+    $('todas').before(alerta);
     $('todas').onclick = () => { const on = lightBtns.some(b => b.getAttribute('aria-pressed') === 'false'); lightBtns.forEach(b => b.set(on)); };
     $('luz').onclick = () => { const on = root.classList.toggle('lit'); document.body.classList.toggle('lit', on); $('luz').setAttribute('aria-pressed', on); };
 

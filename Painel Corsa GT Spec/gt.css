@@ -2,7 +2,9 @@
 html,body{height:100%;margin:0}
 body{display:flex;flex-direction:column;background:#000;color:#dde;font:13px system-ui,sans-serif}
 svg#p,svg#tela{flex:1;min-height:0;width:100%;display:block}
-#ctl{position:relative;min-height:126px;box-sizing:border-box;padding:10px 140px 10px 16px;background:#15181b}
+#ctl{position:relative;min-height:126px;box-sizing:border-box;padding:10px 16px;background:#15181b}
+/* o miolo da ignição (controle.js) pede 136 px de cada lado; aqui o regulador KOUKI fica à esquerda dele e precisa de mais */
+body #ctl{padding-left:250px;padding-right:250px}
 #ctl>div{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:center;margin:6px 0}
 #luzes{gap:6px!important}
 #ctl label{display:flex;align-items:center;gap:8px}

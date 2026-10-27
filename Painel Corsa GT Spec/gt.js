@@ -13,7 +13,7 @@
   const VEICULO = { cv: 92, rpmCv: 5600, kgfm: 13, rpmKgfm: 2600, rpmMax: 6800, lenta: 850, marchas: [3.73, 1.96, 1.32, .95, .76], re: 3.31, final: 3.94,
     pneu: [185, 55, 14], kg: 1000, cxA: .66, inercia: .13, tanque: TANQUE,
     entreEixos: 2.443, frente: .61, hcg: .5, tracao: 'D', freioDiant: .85, esterco: .6,
-    turbo: { pressao: 1.3, inicio: 2500, cheio: 4000, limite: 2.0 }, // acima de 2 bar por mais de 1,5 s o motor de série quebra
+    turbo: { pressao: 1.3, inicio: 2500, cheio: 4000, limite: 2.3 }, // acima de 2,3 bar por mais de 1,5 s o motor de série quebra
     chave: { ateLigar: ['bat', 'oleo', 'inj'], teste: [] } };
 
   // ---- controles (mesmo jeito dos outros painéis) ----
@@ -61,7 +61,7 @@
   $('todas').onclick = () => { const on = lightBtns.some(b => b.getAttribute('aria-pressed') === 'false'); lightBtns.forEach(b => b.set(on)); };
   $('luz').onclick = () => { const on = $('p').classList.toggle('lit'); $('luz').setAttribute('aria-pressed', on); };
 
-  // ---- botão KOUKI: arrastar em volta, rodinha do mouse ou setas; de 0,3 a 3 bar, em 270° de curso (passar de 2 bar quebra o motor) ----
+  // ---- botão KOUKI: arrastar em volta, rodinha do mouse ou setas; de 0,3 a 3 bar, em 270° de curso (passar de 2,3 bar quebra o motor) ----
   const kouki = $('kouki'), reg = $('boostReg');
   const poeReg = b => { b = Math.round(lim(b, .3, 3) * 10) / 10; reg.value = b;
     $('kNo').setAttribute('transform', `rotate(${f(-135 + (b - .3) / 2.7 * 270)})`); $('kV').textContent = br(b) + ' bar'; kouki.setAttribute('aria-valuenow', b); };
